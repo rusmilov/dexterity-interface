@@ -1,3 +1,8 @@
+"""
+This script launches a simple chat command line interface that let's the user
+query GPT for lists of primitives for simple tasks.
+"""
+
 import os
 
 from openai import OpenAI
