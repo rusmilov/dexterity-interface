@@ -1,0 +1,12 @@
+It looks like you've changed the directive from controlling the robot arm. However, if you'd like to proceed with inserting a USB, here are the ranked primitives again:
+
+1. MOVE
+2. PICK
+3. GRASP
+4. MOVE
+5. PLACE
+6. RELEASE
+7. RESET
+8. STOP
+
+If you want to assign a new directive or have any other questions, feel free to ask!

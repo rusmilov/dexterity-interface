@@ -1,0 +1,6 @@
+[submodule "panda-primitives"]
+	path = panda-primitives
+	url = https://github.com/Wisc-HCI/panda-primitives.git
+[submodule "panda-primitives-control"]
+	path = panda-primitives-control
+	url = https://github.com/Wisc-HCI/panda-primitives-control.git

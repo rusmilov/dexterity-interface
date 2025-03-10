@@ -85,4 +85,6 @@ if __name__ == "__main__":
         input_query = input("\033[1m> User: \033[0m")
         output = llm.query_openai(input_query)
         print("\033[1m> Agent: \033[0m\n" + output.choices[0].message.content)
+        with open("output.txt", "w") as f:
+            f.write(output.choices[0].message.content)
 
