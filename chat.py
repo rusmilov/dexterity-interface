@@ -10,7 +10,15 @@ from dotenv import load_dotenv
 
 class LLMInterface:
     def __init__(self):
-        self.chat_history = [{"role": "developer", "content": "You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives to accomplish the given directive. Use stop to indicate the last relavent primative."}]
+        self.chat_history = [{
+            "role": "developer", 
+            "content": (
+                "You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives "
+                "to accomplish the given directive. Use 'stop' to indicate the last relevant primitive. Additionally, "
+                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive "
+                "should be output in the format: 'PRIMITIVE x=... y=... z=...'."
+            )
+}]
 
         # Load API key
         load_dotenv()
@@ -42,7 +50,7 @@ if __name__ == "__main__":
 
     primitives = {
         "PICK":
-            "Gripper moves to the specified position and gripper closes. Once it closed, it move the object the pre-pick position.",
+            "Gripper moves to the specified position and closes the gripper.",
         "PLACE":
             "Gripper should move to the specified position and release. However, the gripper \
             won't directly move to it, but rather move to a pre-place position which is 8cm above the place position, \
@@ -54,11 +62,11 @@ if __name__ == "__main__":
         "MOVE":
             "Moves the gripper to the specified position.",
         "GRASP":
-            "Closes the gripper.",
+            "Closes the gripper only.",
         "RELEASE":
-            "Releases the gripper.",
+            "Releases the gripper only.",
         "STOP":
-            "Immediately stops all movement in with the robot.",
+            "Immediately stops all movement in with the robot and move to the default position.",
         "UNSCREW":
             "Gripper goes to specified position, grasps the object, and untwists is 2 times, and then \
             pull the object up",
@@ -72,11 +80,11 @@ if __name__ == "__main__":
     prim_str  = "Primitives: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
 
     llm = LLMInterface()
-    example_query = "Directive: Open a jar. Assume jar base is already stabilized." + prim_str
-    example_response = "1. MOVE\n 2. UNSCREW\n 2. PLACE\n3. STOP\n"
+    example_query = "Directive: Open a jar at position (0.8, 0.4, 0.2). Assume jar base is already stabilized." + prim_str
+    example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
     llm.init_history(example_query, example_response)
 
-    query = "Directive: Insert a USB." 
+    query = "Directive: Pick the apple which is at (0.4, 0.4, 0.2), and place it in (-0.2, -0.5, 0.2)" 
     print("\033[1m> User: \033[0m" + query)
     output = llm.query_openai(query + prim_str)
     print("\033[1m> Agent: \033[0m\n" + output.choices[0].message.content)
