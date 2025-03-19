@@ -2,9 +2,10 @@
 FROM osrf/ros:noetic-desktop-full
 
 # Set noninteractive to avoid prompts during the build
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Update apt package list and install general packages
+RUN chmod 1777 /tmp
 RUN apt-get update && \
     apt-get install -y --fix-missing \
     curl\
@@ -39,7 +40,7 @@ WORKDIR /workspace/
 
 # Compile panda-primitives package
 WORKDIR /workspace/panda-primitives/
-RUN catkin build authoring
+RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&  catkin build authoring"
 WORKDIR /workspace/
 
 # Automatically load ROS environment when entering the terminal
