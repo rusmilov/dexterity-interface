@@ -112,3 +112,23 @@ For more information, please refer to [panda-primitives-control](https://github.
     You can also run any other scripts in the authoring/test folder in this same manner.
 
 ---
+
+
+
+Mya notes, please ignore:
+```bash
+cd panda-primitives
+catkin build
+
+cd ../dexterity-interface
+catkin build
+
+
+source ../panda-primitives/devel/setup.bash
+source devel/setup.bash
+
+roslaunch interface foxglove.launch
+```
+
+
+TODO prevent urdfs/meshes from being duplicated all over

@@ -19,8 +19,9 @@ RUN apt-get update && \
     ros-noetic-urdfdom-py \
     ros-noetic-kdl-parser-py \
     ros-noetic-kdl-conversions\
-    ros-noetic-spacenav-node\
-    usbutils
+    ros-noetic-spacenav-node \
+    ros-noetic-foxglove-bridge \ 
+    usbutils \
 
 # Install python packages
 RUN pip install websockets\
