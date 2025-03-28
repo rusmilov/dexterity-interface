@@ -3,12 +3,23 @@
   <!-- <include file="$(find pr2_description)/launch/upload_pr2.launch" /> -->
 <param name="robot_description" textfile="$(find interface)/urdfs/panda.urdf" />
 
-  <param name="use_gui" value="true" />
-  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <param name="use_gui" value="true" />
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
-  <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
+    <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
 
-  <!-- WebSocket interface for browser (roslibjs / ros3djs) -->
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+    <!-- WebSocket interface for browser (roslibjs / ros3djs) -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+
+    <node name="interactive_marker_server" pkg="interactive_marker_tutorials" type="basic_controls" output="screen" />
+    
+    <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
+        <param name="topic_ns" value="/basic_controls" />
+        <param name="target_frame" value="/base_link" />
+    </node>
+
+    
+
+    <node pkg="interface" type="marker_listener.py" name="marker_listener" output="screen" />
 </launch>

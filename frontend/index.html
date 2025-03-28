@@ -41,14 +41,22 @@
       rate : 10.0
     });
 
-    // Setup the URDF client.
-    var urdfClient = new ROS3D.UrdfClient({
+    // // Setup the URDF client.
+    // var urdfClient = new ROS3D.UrdfClient({
+    //   ros : ros,
+    //   tfClient : tfClient,
+    //   // urdfModel: 'panda_arm_no_hand.urdf',
+    //   path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/refs/heads/master/src/authoring/', // TODO: Host these somewhere else???
+    //   rootObject : viewer.scene,
+    //   loader : ROS3D.COLLADA_LOADER_2
+    // });
+    var imClient = new ROS3D.InteractiveMarkerClient({
       ros : ros,
       tfClient : tfClient,
-      // urdfModel: 'panda_arm_no_hand.urdf',
+      topic : '/basic_controls',
+      camera : viewer.camera,
+      rootObject : viewer.selectableObjects,
       path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/refs/heads/master/src/authoring/', // TODO: Host these somewhere else???
-      rootObject : viewer.scene,
-      loader : ROS3D.COLLADA_LOADER_2
     });
   }
 </script>
@@ -57,5 +65,6 @@
 <body onload="init()">
   <h1>Simple URDF Example</h1>
   <div id="urdf"></div>
+  <div id="markers"></div>
 </body>
 </html>
