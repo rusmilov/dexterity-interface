@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
@@ -41,13 +41,13 @@
       rate : 10.0
     });
 
-    // // Setup the URDF client.
+    // Setup the URDF client.
     // var urdfClient = new ROS3D.UrdfClient({
     //   ros : ros,
     //   tfClient : tfClient,
     //   // urdfModel: 'panda_arm_no_hand.urdf',
     //   path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/refs/heads/master/src/authoring/', // TODO: Host these somewhere else???
-    //   rootObject : viewer.scene,
+    //   rootObject : viewer.selectableObjects,
     //   loader : ROS3D.COLLADA_LOADER_2
     // });
     var imClient = new ROS3D.InteractiveMarkerClient({
@@ -57,7 +57,9 @@
       camera : viewer.camera,
       rootObject : viewer.selectableObjects,
       path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/refs/heads/master/src/authoring/', // TODO: Host these somewhere else???
+      loader : ROS3D.COLLADA_LOADER_2,
     });
+
   }
 </script>
 </head>
@@ -68,3 +70,65 @@
   <div id="markers"></div>
 </body>
 </html>
+
+
+
+<!-- 
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.85.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.85.0/examples/js/loaders/ColladaLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.85.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4.5/lib/eventemitter2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/roslibjs/1.1.0/roslib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ros3d@1.1.0/build/ros3d.min.js"></script>
+
+<script type="text/javascript" type="text/javascript">
+  /**
+   * Setup all visualization elements when the page is loaded.
+   */
+  function init() {
+    // Connect to ROS.
+    var ros = new ROSLIB.Ros({
+      url : 'ws://localhost:9090'
+    });
+
+    // Create the main viewer.
+    var viewer = new ROS3D.Viewer({
+      divID : 'markers',
+      width : 800,
+      height : 600,
+      antialias : true
+    });
+
+    // Setup a client to listen to TFs.
+    var tfClient = new ROSLIB.TFClient({
+      ros : ros,
+      angularThres : 0.01,
+      transThres : 0.01,
+      rate : 10.0,
+      fixedFrame : '/rotating_frame'
+    });
+
+    // Setup the marker client.
+    var imClient = new ROS3D.InteractiveMarkerClient({
+      ros : ros,
+      tfClient : tfClient,
+      topic : '/basic_controls',
+      camera : viewer.camera,
+      rootObject : viewer.selectableObjects
+    });
+  }
+</script>
+</head>
+
+<body onload="init()">
+  <h1>Simple Marker Example</h1>
+  <div id="markers"></div>
+</body>
+</html> -->

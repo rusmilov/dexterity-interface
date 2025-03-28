@@ -58,7 +58,12 @@
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <depend>interactive_marker_proxy</depend>
+  <exec_depend>interactive_marker_proxy</exec_depend>
+  <exec_depend>interactive_marker_tutorials</exec_depend>
+  <exec_depend>tf2_web_republisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <depend>interactive_markers</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

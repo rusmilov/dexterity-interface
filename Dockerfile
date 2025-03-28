@@ -25,6 +25,7 @@ RUN apt-get update && \
     ros-noetic-rosbridge-server \
     ros-noetic-tf2-web-republisher \
     ros-noetic-interactive-marker-tutorials \
+    ros-noetic-interactive-markers \ 
     usbutils \
 
 # Install python packages
