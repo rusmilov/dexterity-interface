@@ -20,7 +20,10 @@ RUN apt-get update && \
     ros-noetic-kdl-parser-py \
     ros-noetic-kdl-conversions\
     ros-noetic-spacenav-node \
-    ros-noetic-foxglove-bridge \ 
+    # ros-noetic-foxglove-bridge \ 
+    ros-noetic-pr2-description \
+    ros-noetic-rosbridge-server \
+    ros-noetic-tf2-web-republisher \
     usbutils \
 
 # Install python packages

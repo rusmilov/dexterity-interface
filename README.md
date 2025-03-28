@@ -117,17 +117,17 @@ For more information, please refer to [panda-primitives-control](https://github.
 
 Mya notes, please ignore:
 ```bash
-cd panda-primitives
+# cd panda-primitives
+# catkin build
+
+cd dexterity-interface
 catkin build
 
-cd ../dexterity-interface
-catkin build
 
-
-source ../panda-primitives/devel/setup.bash
+# source ../panda-primitives/devel/setup.bash
 source devel/setup.bash
 
-roslaunch interface foxglove.launch
+roslaunch interface backend.launch
 ```
 
 
@@ -138,3 +138,14 @@ https://github.com/cruise-automation/webviz
 https://github.com/osrf/rvizweb
 
 https://robotwebtools.github.io/
+
+
+
+```bash
+cd frontend
+sudo docker build -t frontend .
+
+sudo docker run --rm -it -v $(pwd):/workspace --net=host frontend
+
+npm  start
+```

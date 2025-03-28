@@ -1,0 +1,14 @@
+<launch>
+  <!-- Load the PR2 URDF -->
+  <!-- <include file="$(find pr2_description)/launch/upload_pr2.launch" /> -->
+<param name="robot_description" textfile="$(find interface)/urdfs/panda.urdf" />
+
+  <param name="use_gui" value="true" />
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+
+  <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
+
+  <!-- WebSocket interface for browser (roslibjs / ros3djs) -->
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+</launch>
