@@ -52,10 +52,10 @@
  {
    Marker marker;
  
-   marker.type = Marker::CUBE;
-   marker.scale.x = msg.scale * 0.45;
-   marker.scale.y = msg.scale * 0.45;
-   marker.scale.z = msg.scale * 0.45;
+   marker.type = Marker::POINTS;
+   marker.scale.x = msg.scale * 0.5;
+   marker.scale.y = msg.scale * 0.5;
+   marker.scale.z = msg.scale * 0.5;
    marker.color.r = 0.5;
    marker.color.g = 0.5;
    marker.color.b = 0.5;
@@ -85,13 +85,14 @@
    tf::Transform t;
  
    ros::Time time = ros::Time::now();
- 
-   t.setOrigin(tf::Vector3(0.0, 0.0, sin(float(counter)/140.0) * 2.0));
+  
+   // No transformation right now
+   t.setOrigin(tf::Vector3(0.0, 0.0, 0));
    t.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
    br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "moving_frame"));
  
    t.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
-   t.setRotation(tf::createQuaternionFromRPY(0.0, float(counter)/140.0, 0.0));
+   t.setRotation(tf::createQuaternionFromRPY(0.0, 0, 0.0));
    br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "rotating_frame"));
  
    counter++;
@@ -185,14 +186,14 @@
  ////////////////////////////////////////////////////////////////////////////////////
  
  // %Tag(6DOF)%
- void make6DofMarker( bool fixed, unsigned int interaction_mode, const tf::Vector3& position, bool show_6dof )
+ void make6DofMarker(std::string frame_id, bool fixed, unsigned int interaction_mode, const tf::Vector3& position, bool show_6dof )
  {
    InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
+   int_marker.header.frame_id = frame_id;
    tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
+   int_marker.scale = 0.5;
  
-   int_marker.name = "simple_6dof";
+   int_marker.name = frame_id + "_marker";
    int_marker.description = "Simple 6-DOF Control";
  
    // insert a box
@@ -258,253 +259,7 @@
  }
  // %EndTag(6DOF)%
  
- // %Tag(RandomDof)%
- void makeRandomDofMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
  
-   int_marker.name = "6dof_random_axes";
-   int_marker.description = "6-DOF\n(Arbitrary Axes)";
- 
-   makeBoxControl(int_marker);
- 
-   InteractiveMarkerControl control;
- 
-   for ( int i=0; i<3; i++ )
-   {
-     tf::Quaternion orien(rand(-1,1), rand(-1,1), rand(-1,1), rand(-1,1));
-     orien.normalize();
-     tf::quaternionTFToMsg(orien, control.orientation);
-     control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-     int_marker.controls.push_back(control);
-     control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-     int_marker.controls.push_back(control);
-   }
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(RandomDof)%
- 
- 
- // %Tag(ViewFacing)%
- void makeViewFacingMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "view_facing";
-   int_marker.description = "View Facing 6-DOF";
- 
-   InteractiveMarkerControl control;
- 
-   // make a control that rotates around the view axis
-   control.orientation_mode = InteractiveMarkerControl::VIEW_FACING;
-   control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-   control.orientation.w = 1;
-   control.name = "rotate";
- 
-   int_marker.controls.push_back(control);
- 
-   // create a box in the center which should not be view facing,
-   // but move in the camera plane.
-   control.orientation_mode = InteractiveMarkerControl::VIEW_FACING;
-   control.interaction_mode = InteractiveMarkerControl::MOVE_PLANE;
-   control.independent_marker_orientation = true;
-   control.name = "move";
- 
-   control.markers.push_back( makeBox(int_marker) );
-   control.always_visible = true;
- 
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(ViewFacing)%
- 
- 
- // %Tag(Quadrocopter)%
- void makeQuadrocopterMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "quadrocopter";
-   int_marker.description = "Quadrocopter";
- 
-   makeBoxControl(int_marker);
- 
-   InteractiveMarkerControl control;
- 
-   tf::Quaternion orien(0.0, 1.0, 0.0, 1.0);
-   orien.normalize();
-   tf::quaternionTFToMsg(orien, control.orientation);
-   control.interaction_mode = InteractiveMarkerControl::MOVE_ROTATE;
-   int_marker.controls.push_back(control);
-   control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(Quadrocopter)%
- 
- // %Tag(ChessPiece)%
- void makeChessPieceMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "chess_piece";
-   int_marker.description = "Chess Piece\n(2D Move + Alignment)";
- 
-   InteractiveMarkerControl control;
- 
-   tf::Quaternion orien(0.0, 1.0, 0.0, 1.0);
-   orien.normalize();
-   tf::quaternionTFToMsg(orien, control.orientation);
-   control.interaction_mode = InteractiveMarkerControl::MOVE_PLANE;
-   int_marker.controls.push_back(control);
- 
-   // make a box which also moves in the plane
-   control.markers.push_back( makeBox(int_marker) );
-   control.always_visible = true;
-   int_marker.controls.push_back(control);
- 
-   // we want to use our special callback function
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- 
-   // set different callback for POSE_UPDATE feedback
-   server->setCallback(int_marker.name, &alignMarker, visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE );
- }
- // %EndTag(ChessPiece)%
- 
- // %Tag(PanTilt)%
- void makePanTiltMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "pan_tilt";
-   int_marker.description = "Pan / Tilt";
- 
-   makeBoxControl(int_marker);
- 
-   InteractiveMarkerControl control;
- 
-   tf::Quaternion orien(0.0, 1.0, 0.0, 1.0);
-   orien.normalize();
-   tf::quaternionTFToMsg(orien, control.orientation);
-   control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-   control.orientation_mode = InteractiveMarkerControl::FIXED;
-   int_marker.controls.push_back(control);
- 
-   orien = tf::Quaternion(0.0, 0.0, 1.0, 1.0);
-   orien.normalize();
-   tf::quaternionTFToMsg(orien, control.orientation);
-   control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-   control.orientation_mode = InteractiveMarkerControl::INHERIT;
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(PanTilt)%
- 
- // %Tag(Menu)%
- void makeMenuMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "context_menu";
-   int_marker.description = "Context Menu\n(Right Click)";
- 
-   InteractiveMarkerControl control;
- 
-   control.interaction_mode = InteractiveMarkerControl::MENU;
-   control.name = "menu_only_control";
- 
-   Marker marker = makeBox( int_marker );
-   control.markers.push_back( marker );
-   control.always_visible = true;
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
-   menu_handler.apply( *server, int_marker.name );
- }
- // %EndTag(Menu)%
- 
- // %Tag(Button)%
- void makeButtonMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "panda_link0";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "button";
-   int_marker.description = "Button\n(Left Click)";
- 
-   InteractiveMarkerControl control;
- 
-   control.interaction_mode = InteractiveMarkerControl::BUTTON;
-   control.name = "button_control";
- 
-   Marker marker = makeBox( int_marker );
-   control.markers.push_back( marker );
-   control.always_visible = true;
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(Button)%
- 
- // %Tag(Moving)%
- void makeMovingMarker( const tf::Vector3& position )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = "moving_frame";
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 1;
- 
-   int_marker.name = "moving";
-   int_marker.description = "Marker Attached to a\nMoving Frame";
- 
-   InteractiveMarkerControl control;
- 
-   tf::Quaternion orien(1.0, 0.0, 0.0, 1.0);
-   orien.normalize();
-   tf::quaternionTFToMsg(orien, control.orientation);
-   control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-   int_marker.controls.push_back(control);
- 
-   control.interaction_mode = InteractiveMarkerControl::MOVE_PLANE;
-   control.always_visible = true;
-   control.markers.push_back( makeBox(int_marker) );
-   int_marker.controls.push_back(control);
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
- }
- // %EndTag(Moving)%
  
  // %Tag(main)%
  int main(int argc, char** argv)
@@ -519,40 +274,19 @@
  
    ros::Duration(0.1).sleep();
  
-   menu_handler.insert( "First Entry", &processFeedback );
-   menu_handler.insert( "Second Entry", &processFeedback );
-   interactive_markers::MenuHandler::EntryHandle sub_menu_handle = menu_handler.insert( "Submenu" );
-   menu_handler.insert( sub_menu_handle, "First Entry", &processFeedback );
-   menu_handler.insert( sub_menu_handle, "Second Entry", &processFeedback );
+  //  menu_handler.insert( "First Entry", &processFeedback );
+  //  menu_handler.insert( "Second Entry", &processFeedback );
+  //  interactive_markers::MenuHandler::EntryHandle sub_menu_handle = menu_handler.insert( "Submenu" );
+  //  menu_handler.insert( sub_menu_handle, "First Entry", &processFeedback );
+  //  menu_handler.insert( sub_menu_handle, "Second Entry", &processFeedback );
  
    tf::Vector3 position;
-   position = tf::Vector3(-3, 3, 0);
-   make6DofMarker( false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
-   position = tf::Vector3( 0, 3, 0);
-   make6DofMarker( true, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
-   position = tf::Vector3( 3, 3, 0);
-   makeRandomDofMarker( position );
-   position = tf::Vector3(-3, 0, 0);
-   make6DofMarker( false, visualization_msgs::InteractiveMarkerControl::ROTATE_3D, position, false );
-   position = tf::Vector3( 0, 0, 0);
-   make6DofMarker( false, visualization_msgs::InteractiveMarkerControl::MOVE_ROTATE_3D, position, true );
-   position = tf::Vector3( 3, 0, 0);
-   make6DofMarker( false, visualization_msgs::InteractiveMarkerControl::MOVE_3D, position, false );
-   position = tf::Vector3(-3,-3, 0);
-   makeViewFacingMarker( position );
-   position = tf::Vector3( 0,-3, 0);
-   makeQuadrocopterMarker( position );
-   position = tf::Vector3( 3,-3, 0);
-   makeChessPieceMarker( position );
-   position = tf::Vector3(-3,-6, 0);
-   makePanTiltMarker( position );
-   position = tf::Vector3( 0,-6, 0);
-   makeMovingMarker( position );
-   position = tf::Vector3( 3,-6, 0);
-   makeMenuMarker( position );
-   position = tf::Vector3( 0,-9, 0);
-   makeButtonMarker( position );
- 
+   position = tf::Vector3(0, 0, 0);
+   make6DofMarker( "panda_link0", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
+   make6DofMarker( "panda_link5", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
+   make6DofMarker( "panda_link7", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
+
+  
    server->applyChanges();
  
    ros::spin();
