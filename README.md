@@ -128,8 +128,10 @@ catkin build
 source devel/setup.bash
 
 roslaunch interface backend.launch
+roslaunch authoring all.launch only_virtual:=true
+roslaunch authoring all.launch only_virtual:=true
 
-
+# Troubleshooting
 rosrun tf2_tools view_frames.py
 ```
 

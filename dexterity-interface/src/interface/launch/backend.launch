@@ -1,34 +1,23 @@
 <launch>
   <!-- Load the PR2 URDF -->
-  <!-- <include file="$(find pr2_description)/launch/upload_pr2.launch" /> -->
-<param name="robot_description" textfile="$(find interface)/urdfs/panda.urdf" />
+    <!-- <param name="robot_description" textfile="$(find interface)/urdfs/panda.urdf" />
 
     <param name="use_gui" value="true" />
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" /> -->
     <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 
 
 
-    <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" />
-    <!-- <node pkg="interface" type="marker_publisher.py" name="interactive_marker_server" output="screen" /> -->
-
-    <!-- <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
-        <param name="topic_ns" value="/basic_controls" />
-        <param name="target_frame" value="/base_link" />
-    </node> -->
+    <!-- <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" />
 
     <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
         <remap from="topic_ns" to="/basic_controls" />
         <remap from="target_frame" to="/rotating_frame" />
-    </node>
+    </node> -->
 
     
-
-    
-
-    <!-- <node pkg="interface" type="marker_listener.py" name="marker_listener" output="screen" /> -->
 
 
 </launch>
