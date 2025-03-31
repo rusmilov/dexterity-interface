@@ -11,8 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  authoring
   interactive_markers
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -169,6 +169,9 @@ target_link_libraries(basic_controls
 catkin_install_python(PROGRAMS
   scripts/marker_listener.py
   scripts/marker_publisher.py
+  scripts/llm_executor.py
+  scripts/llm_handler.py
+  scripts/LLMInterface.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

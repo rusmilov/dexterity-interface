@@ -64,6 +64,9 @@
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <depend>interactive_markers</depend>
+  <depend>tf</depend>
+  <exec_depend>authoring_msgs</exec_depend>
+  <exec_depend>panda_ros_msgs</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

@@ -8,3 +8,9 @@
 	path = dexterity-interface/src/interactive_marker_proxy_noetic
 	url = https://github.com/Mechazo11/interactive_marker_proxy_noetic.git
 	branch = develop
+[submodule "dexterity-interface/src/authoring-msgs"]
+	path = dexterity-interface/src/authoring-msgs
+	url = https://github.com/emmanuel-senft/authoring-msgs.git
+[submodule "dexterity-interface/src/panda-ros-msgs"]
+	path = dexterity-interface/src/panda-ros-msgs
+	url = https://github.com/emmanuel-senft/panda-ros-msgs.git
