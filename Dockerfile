@@ -26,7 +26,8 @@ RUN apt-get update && \
     ros-noetic-tf2-web-republisher \
     ros-noetic-interactive-marker-tutorials \
     ros-noetic-interactive-markers \ 
-    usbutils \
+    ros-noetic-tf2-tools \
+    usbutils
 
 # Install python packages
 RUN pip install websockets\

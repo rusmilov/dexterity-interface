@@ -37,8 +37,13 @@
  #include <tf/tf.h>
  
  #include <math.h>
+ #include <sensor_msgs/JointState.h>
+
+ros::Publisher joint_pub;
+std::map<std::string, double> joint_values;
  
  using namespace visualization_msgs;
+ std::map<std::string, geometry_msgs::Pose> marker_poses;
  
  
  // %Tag(vars)%
@@ -85,11 +90,22 @@
    tf::Transform t;
  
    ros::Time time = ros::Time::now();
+
+   sensor_msgs::JointState js;
+   js.header.stamp = ros::Time::now();
+   for (const auto& joint : joint_values)
+   {
+     js.name.push_back(joint.first);
+     js.position.push_back(joint.second);
+   }
+   joint_pub.publish(js);
+
+  //  marker_poses.clear();
   
-   // No transformation right now
-   t.setOrigin(tf::Vector3(0.0, 0.0, 0));
-   t.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
-   br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "moving_frame"));
+  //  // No transformation right now
+  //  t.setOrigin(tf::Vector3(0.0, 0.0, 0));
+  //  t.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
+  //  br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "moving_frame"));
  
    t.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
    t.setRotation(tf::createQuaternionFromRPY(0.0, 0, 0.0));
@@ -102,6 +118,24 @@
  // %Tag(processFeedback)%
  void processFeedback( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
  {
+
+  std::string original = feedback->marker_name;
+
+  // Replace "link" with "joint"
+  std::string joint_name = original;
+  size_t pos = joint_name.find("link");
+  if (pos != std::string::npos) {
+    joint_name.replace(pos, 4, "joint");
+  }
+
+  tf::Quaternion tf_quat;
+  tf::quaternionMsgToTF(feedback->pose.orientation, tf_quat);
+  // Get Euler angles
+  double roll, pitch, yaw;
+  tf::Matrix3x3(tf_quat).getRPY(roll, pitch, yaw);
+  joint_values[joint_name] = yaw;
+
+
    std::ostringstream s;
    s << "Feedback from marker '" << feedback->marker_name << "' "
        << " / control '" << feedback->control_name << "'";
@@ -117,14 +151,7 @@
  
    switch ( feedback->event_type )
    {
-     case visualization_msgs::InteractiveMarkerFeedback::BUTTON_CLICK:
-       ROS_INFO_STREAM( s.str() << ": button click" << mouse_point_ss.str() << "." );
-       break;
- 
-     case visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT:
-       ROS_INFO_STREAM( s.str() << ": menu item " << feedback->menu_entry_id << " clicked" << mouse_point_ss.str() << "." );
-       break;
- 
+
      case visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE:
        ROS_INFO_STREAM( s.str() << ": pose changed"
            << "\nposition = "
@@ -193,7 +220,7 @@
    tf::pointTFToMsg(position, int_marker.pose.position);
    int_marker.scale = 0.5;
  
-   int_marker.name = frame_id + "_marker";
+   int_marker.name = frame_id;
    int_marker.description = "Simple 6-DOF Control";
  
    // insert a box
@@ -221,35 +248,14 @@
  
    if(show_6dof)
    {
-     tf::Quaternion orien(1.0, 0.0, 0.0, 1.0);
-     orien.normalize();
-     tf::quaternionTFToMsg(orien, control.orientation);
-     control.name = "rotate_x";
-     control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-     int_marker.controls.push_back(control);
-     control.name = "move_x";
-     control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-     int_marker.controls.push_back(control);
- 
-     orien = tf::Quaternion(0.0, 1.0, 0.0, 1.0);
-     orien.normalize();
-     tf::quaternionTFToMsg(orien, control.orientation);
-     control.name = "rotate_z";
-     control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-     int_marker.controls.push_back(control);
-     control.name = "move_z";
-     control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-     int_marker.controls.push_back(control);
- 
-     orien = tf::Quaternion(0.0, 0.0, 1.0, 1.0);
-     orien.normalize();
-     tf::quaternionTFToMsg(orien, control.orientation);
-     control.name = "rotate_y";
-     control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-     int_marker.controls.push_back(control);
-     control.name = "move_y";
-     control.interaction_mode = InteractiveMarkerControl::MOVE_AXIS;
-     int_marker.controls.push_back(control);
+      // Set control orientation to Y-axis
+      tf::Quaternion orien(0.0, 1.0, 0.0, 1.0);  // Y-axis
+      orien.normalize();
+      tf::quaternionTFToMsg(orien, control.orientation);
+
+      control.name = "rotate_y";
+      control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
+      int_marker.controls.push_back(control);
    }
  
    server->insert(int_marker);
@@ -264,11 +270,16 @@
  // %Tag(main)%
  int main(int argc, char** argv)
  {
+  
    ros::init(argc, argv, "basic_controls");
    ros::NodeHandle n;
+
+   ros::Duration(1.0).sleep();
  
    // create a timer to update the published transforms
    ros::Timer frame_timer = n.createTimer(ros::Duration(0.01), frameCallback);
+
+   joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 10);
  
    server.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
  
@@ -282,7 +293,7 @@
  
    tf::Vector3 position;
    position = tf::Vector3(0, 0, 0);
-   make6DofMarker( "panda_link0", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
+   make6DofMarker( "panda_link1", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
    make6DofMarker( "panda_link5", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
    make6DofMarker( "panda_link7", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
 
