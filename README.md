@@ -129,15 +129,17 @@ source devel/setup.bash
 
 roslaunch interface backend.launch
 roslaunch authoring all.launch only_virtual:=true
-roslaunch authoring all.launch only_virtual:=true
+
+rosrun interface llm_handler.py
+
 
 # Troubleshooting
 rosrun tf2_tools view_frames.py
 ```
 
 
-TODO prevent urdfs/meshes from being duplicated all over. TODO: Fix location???
-
+TODO fix urdf funkiness 
+TODO clean up package and workspace funkiness and duplication
 
 https://github.com/cruise-automation/webviz
 https://github.com/osrf/rvizweb
@@ -146,14 +148,4 @@ https://robotwebtools.github.io/
 
 https://github.com/Mechazo11/interactive_marker_proxy_noetic
 https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
-
-```bash
-cd frontend
-sudo docker build -t frontend .
-
-sudo docker run --rm -it -v $(pwd):/workspace --net=host frontend
-
-npm  start
-```
-
 
