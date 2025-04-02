@@ -94,29 +94,13 @@ class LLMHandler():
         self.llm_exec_pub = rospy.Publisher("/llm_commands", String, queue_size=10)
         self.llm_response_pub = rospy.Publisher("/llm_response", String, queue_size=10)
         rospy.Subscriber("/user_response", String, self.user_response_callback)
-        rospy.loginfo("MADE IT HERE 1!")
 
     def user_response_callback(self, msg):
-        rospy.loginfo("MADE IT HERE!")
-
-        
-
-        # query = "Directive: Pick the apple which is at (0.5, 0, 0), and place it in (0.5, 0.1, 0)" 
-        # print("\033[1m> User: \033[0m" + query)
-        # output = llm.query_openai(query)
-        # commands = output.choices[0].message.content
-        # print("\033[1m> Agent: \033[0m\n" + commands)
-        # rospy.loginfo(f"Publishing complete command set:{commands}")
-        # pub.publish(commands)
-            
-
- 
         output = self.llm.query_openai("Directive: " + msg.data)
         commands = output.choices[0].message.content
-        # print("\033[1m> Agent: \033[0m\n" + commands)
-        # rospy.loginfo(f"Publishing complete command set:{commands}")
-        self.llm_exec_pub.publish(commands)
         self.llm_response_pub.publish(commands)
+        self.llm_exec_pub.publish(commands)
+        
 
         rospy.loginfo("All commands have been published as a single message. Waiting for subscribers to process...")
         

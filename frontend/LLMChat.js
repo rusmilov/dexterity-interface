@@ -21,12 +21,11 @@ export class LLMChat {
     }
 
     llmListenerCallback(message) {
-      // console.log('Received message on ' + this.llmListener.name + ': ' + message.data);
+      console.log('Received message on ' + this.llmListener.name + ': ' + message.data);
       let historyElem = document.getElementById(this.chatHistoryID);
       const text = document.createElement("pre");
       text.textContent = `AGENT:\n${message.data}`;
       historyElem.appendChild(text);
-      this.llmListener.unsubscribe();
 
     }
     

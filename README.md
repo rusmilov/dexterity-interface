@@ -80,8 +80,7 @@ source devel/setup.bash
 
 roslaunch interface backend.launch
 
-# Run this ina another terminal
-rosrun interface llm_handler.py
+
 ```
 
 
