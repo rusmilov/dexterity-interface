@@ -1,51 +1,7 @@
 #!/usr/bin/env python
 import rospy, os
-# from interface.LLMInterface import LLMInterface
+from LLMInterface import LLMInterface
 from std_msgs.msg import String
-
-import os
-
-from openai import OpenAI
-from dotenv import load_dotenv
-
-
-# TODO move this into its own file
-class LLMInterface:
-    def __init__(self):
-        self.chat_history = [{
-            "role": "developer", 
-            "content": (
-                "You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives "
-                "to accomplish the given directive. Use 'stop' to indicate the last relevant primitive. Additionally, "
-                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive "
-                "should be output in the format: 'PRIMITIVE x=... y=... z=...'."
-            )
-}]
-
-        # Load API key
-        load_dotenv()
-        llm_api_key = os.getenv('OPENAI_API')
-        self.client = OpenAI(api_key=llm_api_key)
-
-    def init_history(self, example_query:str, example_response:str):
-        """
-        Give an example chat user query and LLM response before starting chat.
-        """
-        self.chat_history += [{"role": "user", "content": example_query}, {"role": "assistant", "content": example_response}]
-
-
-    def query_openai(self, input:str) -> "OpenAI.ChatCompletion":
-        """
-        Query GPT with chat history.
-        """
-        self.chat_history.append({"role": "user", "content": input})
-        completion = self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=self.chat_history
-        )
-
-        return completion
-
 
 
 

@@ -171,7 +171,6 @@ catkin_install_python(PROGRAMS
   scripts/marker_publisher.py
   scripts/llm_executor.py
   scripts/llm_handler.py
-  scripts/LLMInterface.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
