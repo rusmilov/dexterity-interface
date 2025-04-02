@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
@@ -9,57 +9,46 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/roslibjs/1.1.0/roslib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ros3d@1.1.0/build/ros3d.min.js"></script>
 
-
-<script>
-  /**
-   * Setup all visualization elements when the page is loaded.
-   */
-  function init() {
-    // Connect to ROS.
-    var ros = new ROSLIB.Ros({
-      url : 'ws://localhost:9090'
-    });
-
-    // Create the main viewer.
-    var viewer = new ROS3D.Viewer({
-      divID : 'urdf',
-      width : 800,
-      height : 600,
-      antialias : true,
-      fixedFrame: 'panda_link0'
-    });
-
-    // Add a grid.
-    viewer.addObject(new ROS3D.Grid());
-
-    // Setup a client to listen to TFs.
-    var tfClient = new ROSLIB.TFClient({
-      fixedFrame: 'panda_link0',
-      ros : ros,
-      angularThres : 0.01,
-      transThres : 0.01,
-      rate : 10.0
-    });
-
-    // Setup the URDF client.
-    var urdfClient = new ROS3D.UrdfClient({
-      ros : ros,
-      tfClient : tfClient,
-      // urdfModel: 'panda_arm_no_hand.urdf',
-      path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/refs/heads/master/src/authoring/', // TODO: Host these somewhere else???
-      rootObject : viewer.selectableObjects,
-      loader : ROS3D.COLLADA_LOADER_2
-    });
+  <!-- Styling -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> 
 
 
-  }
+<script type="module">
+  import {Visualizer } from './Visualizer.js';
+  import {LLMChat } from './LLMChat.js';
+
+  let rosConnection = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+  });
+  
+  let visualizer = new Visualizer(rosConnection, "visualizer")
+  window.visualizer = visualizer; // Expose to global scope for onload
+
+  let llmChat = new LLMChat(rosConnection, "", "chatHistory")
+  window.llmChat = llmChat; // Expose to global scope for onload
+
+    
 </script>
 </head>
 
-<body onload="init()">
-  <h1>Super Awesome GUI</h1>
-  <div id="urdf"></div>
-  <div id="markers"></div>
+<body onload="visualizer.init()" class="bg-black text-white p-10">
+  <h1 class="text-xl flex justify-center">Super Awesome GUI</h1>
+  <div class="flex flex-wrap mt-10 ">
+    <div  id="visualizer" class="w-full xl:w-2/3 flex justify-center"></div>
+
+    <div class="w-full xl:w-1/3 p-3 ">
+      <div id="chatHistory">
+
+      </div>
+      <textarea type="text" id="userInput" class="border-3 border-gray-700 rounded-lg w-full p-1 "
+        value=""> Pick the apple which is at (0.5, 0, 0), and place it in (0.5, 0.1, 0)</textarea>
+
+      <div class="">
+        <button onclick="llmChat.userInputCallback('userInput')" class="bg-gray-700 rounded-sm hover:bg-gray-800 p-2" >Enter</button>
+      </div>
+    </div>
+  </div>
+  
 </body>
 </html>
 

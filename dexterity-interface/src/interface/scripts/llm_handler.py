@@ -8,6 +8,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
+
 # TODO move this into its own file
 class LLMInterface:
     def __init__(self):
@@ -45,69 +46,83 @@ class LLMInterface:
 
         return completion
 
-if __name__ == "__main__":
-    # Initialize the ROS node
-    rospy.init_node("chat_instructions_publisher")
-    
-    # Create a publisher to the '/llm_commands' topic with message type `String`
-    pub = rospy.Publisher("/llm_commands", String, queue_size=10)
-    rospy.sleep(1.0)  # Small delay to ensure the publisher registers successfully
-
-    primitives = {
-        "PICK":
-            "Gripper moves to the specified position and closes the gripper.",
-        "PLACE":
-            "Gripper should move to the specified position and release. However, the gripper \
-            won't directly move to it, but rather move to a pre-place position which is 8cm above the place position, \
-            then move slowly with force control to the place position. Once it released, it will return to the pre-place \
-            position. \
-            Not like drop, the place action put things down slowly with care.",
-        "RESET":
-            "Releases the gripper and moves the arm back to the default position",
-        "MOVE":
-            "Moves the gripper to the specified position.",
-        "GRASP":
-            "Closes the gripper only.",
-        # "RELEASE":
-        #     "Releases the gripper only.",
-        "STOP":
-            "Immediately stops all movement in with the robot and move to the default position.",
-        "UNSCREW":
-            "Gripper goes to specified position, grasps the object, and untwists is 2 times, and then \
-            pull the object up",
-        "DROP":
-            "Gripper should move to the specified position and release. However, the gripper\
-            won't directly move to it, but rather move to a pre-drop position which is 8cm above the drop position,\
-            then move IMMEDIATELY to the drop position. Once it released, it will return to the pre-drop \
-            position.Not like place, the drop action put down things quickly."
-    }
 
 
-    prim_str  = "Primitives: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
 
-    llm = LLMInterface()
-    example_query = "Directive: Open a jar at position (0.8, 0.4, 0.2). Assume jar base is already stabilized." + prim_str
-    example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
-    llm.init_history(example_query, example_response)
+class LLMHandler():
+    def __init__(self):
+        rospy.init_node('llm_handler')
 
-    query = "Directive: Pick the apple which is at (0.5, 0, 0), and place it in (0.5, 0.1, 0)" 
-    print("\033[1m> User: \033[0m" + query)
-    output = llm.query_openai(query)
-    commands = output.choices[0].message.content
-    print("\033[1m> Agent: \033[0m\n" + commands)
-    rospy.loginfo(f"Publishing complete command set:{commands}")
-    pub.publish(commands)
+        primitives = {
+            "PICK":
+                "Gripper moves to the specified position and closes the gripper.",
+            "PLACE":
+                "Gripper should move to the specified position and release. However, the gripper \
+                won't directly move to it, but rather move to a pre-place position which is 8cm above the place position, \
+                then move slowly with force control to the place position. Once it released, it will return to the pre-place \
+                position. \
+                Not like drop, the place action put things down slowly with care.",
+            "RESET":
+                "Releases the gripper and moves the arm back to the default position",
+            "MOVE":
+                "Moves the gripper to the specified position.",
+            "GRASP":
+                "Closes the gripper only.",
+            # "RELEASE":
+            #     "Releases the gripper only.",
+            "STOP":
+                "Immediately stops all movement in with the robot and move to the default position.",
+            "UNSCREW":
+                "Gripper goes to specified position, grasps the object, and untwists is 2 times, and then \
+                pull the object up",
+            "DROP":
+                "Gripper should move to the specified position and release. However, the gripper\
+                won't directly move to it, but rather move to a pre-drop position which is 8cm above the drop position,\
+                then move IMMEDIATELY to the drop position. Once it released, it will return to the pre-drop \
+                position.Not like place, the drop action put down things quickly."
+        }
+
+
+        prim_str  = "Primitives: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
+
+        self.llm = LLMInterface()
+        example_query = "Directive: Open a jar at position (0.8, 0.4, 0.2). Assume jar base is already stabilized." + prim_str
+        example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
+        self.llm.init_history(example_query, example_response)
+
+
+        self.llm_exec_pub = rospy.Publisher("/llm_commands", String, queue_size=10)
+        self.llm_response_pub = rospy.Publisher("/llm_response", String, queue_size=10)
+        rospy.Subscriber("/user_response", String, self.user_response_callback)
+        rospy.loginfo("MADE IT HERE 1!")
+
+    def user_response_callback(self, msg):
+        rospy.loginfo("MADE IT HERE!")
+
         
 
-    while(True):
-        input_query = input("\033[1m> User: \033[0m")
-        output = llm.query_openai(input_query)
+        # query = "Directive: Pick the apple which is at (0.5, 0, 0), and place it in (0.5, 0.1, 0)" 
+        # print("\033[1m> User: \033[0m" + query)
+        # output = llm.query_openai(query)
+        # commands = output.choices[0].message.content
+        # print("\033[1m> Agent: \033[0m\n" + commands)
+        # rospy.loginfo(f"Publishing complete command set:{commands}")
+        # pub.publish(commands)
+            
+
+ 
+        output = self.llm.query_openai("Directive: " + msg.data)
         commands = output.choices[0].message.content
-        print("\033[1m> Agent: \033[0m\n" + commands)
-        rospy.loginfo(f"Publishing complete command set:{commands}")
-        pub.publish(commands)
+        # print("\033[1m> Agent: \033[0m\n" + commands)
+        # rospy.loginfo(f"Publishing complete command set:{commands}")
+        self.llm_exec_pub.publish(commands)
+        self.llm_response_pub.publish(commands)
 
         rospy.loginfo("All commands have been published as a single message. Waiting for subscribers to process...")
-        rospy.spin()  # Keep the node running
+        
+
+if __name__ == "__main__":
+    llm_handler = LLMHandler()
+    rospy.spin()  # Keep the node running
 
 

@@ -1,39 +1,12 @@
 # Dexterity Interface
 
-## Get LLM's instructions
+## Setup LLM configs
 1. First, you need to create a .env file in this folder with the OpenAI credentials. It should be in this format:
     ```bash
     OPENAI_API=YOUR_API_KEY_HERE
     ```
 
-2. Next, start a python virtual environment in this directory:
 
-    Linux/Mac:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  
-    ```
-
-    Windows:
-    ```powershell
-    python3 -m venv venv
-    .\venv\Scripts\Activate.ps1
-    ```
-
-    If this windows command doesn't work, you may have to run this in an Admin shell first:
-    ```powershell
-    set-executionpolicy remotesigned
-    ```
-
-3. Next, install all the python requirements:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4. Then, you can run the llm script with:
-    ```bash
-    python3 chat.py
-    ```
-    Note: if your venv has become deactivated, you may need to reactivate it with the activate command in the Setup section.
 
 ## Set up the repository and run the container
 1. Check prerequisites for [panda-primitives](https://github.com/Wisc-HCI/panda-primitives) and [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control)
@@ -100,18 +73,18 @@ This step will compile panda-primitives-control package that control Panda Robot
 For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control)
 
 ## Run
+Run the following:
+```bash
+cd dexterity-interface
+source devel/setup.bash
 
-1. In a seperate terminal(second, still in your docker container), Run one of the following:
-    * [SIMULATION] `roslaunch authoring all.launch only_virtual:=true`
-    * [ON ROBOT] `roslaunch authoring all.launch`
+roslaunch interface backend.launch
 
-2. Once we finished talking with llm, its response will be record at output.txt, then in a seperate terminal (third, still in your docker container), run:
-    ```bash
-    roslaunch authoring llm_control.launch
-    ```
-    You can also run any other scripts in the authoring/test folder in this same manner.
+# Run this ina another terminal
+rosrun interface llm_handler.py
+```
 
----
+
 
 
 
@@ -128,7 +101,6 @@ catkin build
 source devel/setup.bash
 
 roslaunch interface backend.launch
-roslaunch authoring all.launch only_virtual:=true
 
 rosrun interface llm_handler.py
 
@@ -148,4 +120,5 @@ https://robotwebtools.github.io/
 
 https://github.com/Mechazo11/interactive_marker_proxy_noetic
 https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
+http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
 

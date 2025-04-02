@@ -1,5 +1,6 @@
 <launch>
     <node pkg="interface" type="llm_executor.py" name="llm_executor" output="screen" />
+    <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen" />
   <!-- Load the PR2 URDF -->
     <!-- <param name="robot_description" textfile="$(find interface)/urdfs/panda.urdf" />
 

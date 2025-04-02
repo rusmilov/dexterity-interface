@@ -29,12 +29,11 @@ RUN apt-get update && \
     ros-noetic-tf2-tools \
     usbutils
 
-# Install python packages
-RUN pip install websockets\
-    scipy
+
 
 # Add python alias to python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
+
 
 # Setup spacenavd (can't use apt-get bc that version is too old)
 COPY . /workspace
@@ -44,6 +43,9 @@ WORKDIR /workspace/panda-primitives-control/spacenavd
 RUN ./configure
 RUN make install
 WORKDIR /workspace/
+
+# Install python packages
+RUN pip install -r requirements.txt
 
 # Compile panda-primitives package
 WORKDIR /workspace/panda-primitives/
