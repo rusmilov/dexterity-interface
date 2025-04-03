@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy, os
-from LLMInterface import LLMInterface
+from llm_interface import LLMInterface
 from std_msgs.msg import String
 
 

@@ -166,13 +166,14 @@ target_link_libraries(basic_controls
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-  scripts/marker_listener.py
-  scripts/marker_publisher.py
-  scripts/llm_executor.py
-  scripts/llm_handler.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# catkin_install_python(PROGRAMS
+#   scripts/marker_listener.py
+#   scripts/marker_publisher.py
+#   scripts/llm_executor.py
+#   scripts/llm_handler.py
+#   scripts/llm_interface.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
