@@ -9,13 +9,6 @@ class LLMHandler():
     def __init__(self):
         rospy.init_node('llm_handler')
 
-        llm_role = ("You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives " +
-                "to accomplish the given directive. Use 'STOP' to indicate the last relevant primitive. Additionally, " + 
-                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive " +
-                "should be output in the format: 'PRIMITIVE x=... y=... z=...'." )
-
-        self.llm = LLMInterface(llm_role)
-
         primitives = {
             "PICK":
                 "Gripper moves to the specified position and closes the gripper.",
@@ -46,9 +39,17 @@ class LLMHandler():
         }
 
 
-        prim_str  = "Primitives: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
+        prim_str  = "PRIMITIVES: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
 
-        example_query = "Directive: Open a jar at position (0.8, 0.4, 0.2). Assume jar base is already stabilized." + prim_str
+        llm_role = ("You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives " +
+                "to accomplish the given directive using the provided objects and coordinates. Use 'STOP' to indicate the last relevant primitive. Additionally, " + 
+                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive " +
+                "should be output in the format: 'PRIMITIVE x=... y=... z=...'. " + prim_str )
+
+        self.llm = LLMInterface(llm_role)
+
+
+        example_query = "Directive: Open a jar. Assume jar base is already stabilized. Objects: {'jar': (0.8, 0.4, 0.2), 'apple': (0.5, -0.4, 0.2)}"
         example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
         self.llm.init_history(example_query, example_response)
 
@@ -58,13 +59,28 @@ class LLMHandler():
         rospy.Subscriber("/user_response", String, self.user_response_callback)
 
     def user_response_callback(self, msg):
-        output = self.llm.query_openai("Directive: " + msg.data)
+        
+        scene_objects = self.get_current_objects()
+        output = self.llm.query_openai("Directive: " + msg.data + 'Objects: ' + scene_objects)
         commands = output.choices[0].message.content
         self.llm_response_pub.publish(commands)
         self.llm_exec_pub.publish(commands)
         
 
         rospy.loginfo("All commands have been published as a single message. Waiting for subscribers to process...")
+
+
+    def get_current_objects(self):
+
+        # TODO VLM INTERFACE with ros HERE
+
+        objects = {
+            'apple': (0.5, 0, 0),
+            'bread': (0.5, 0.2, 0),
+            'peanut butter jar': (0.5,-0.2, 1)
+        }
+
+        return str(objects)
         
 
 if __name__ == "__main__":
