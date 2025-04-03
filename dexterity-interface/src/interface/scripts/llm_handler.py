@@ -9,6 +9,13 @@ class LLMHandler():
     def __init__(self):
         rospy.init_node('llm_handler')
 
+        llm_role = ("You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives " +
+                "to accomplish the given directive. Use 'STOP' to indicate the last relevant primitive. Additionally, " + 
+                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive " +
+                "should be output in the format: 'PRIMITIVE x=... y=... z=...'." )
+
+        self.llm = LLMInterface(llm_role)
+
         primitives = {
             "PICK":
                 "Gripper moves to the specified position and closes the gripper.",
@@ -41,7 +48,6 @@ class LLMHandler():
 
         prim_str  = "Primitives: " + " | ".join(f"{key}: {value}" for key, value in primitives.items())
 
-        self.llm = LLMInterface()
         example_query = "Directive: Open a jar at position (0.8, 0.4, 0.2). Assume jar base is already stabilized." + prim_str
         example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
         self.llm.init_history(example_query, example_response)

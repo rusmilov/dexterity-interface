@@ -1,8 +1,7 @@
 #! /usr/bin/env python3
 
 """
-This script launches a simple chat command line interface that let's the user
-query GPT for lists of primitives for simple tasks.
+This class allows ongoing chat the ChatGPT with history.
 """
 
 import os
@@ -11,15 +10,10 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 class LLMInterface:
-    def __init__(self):
+    def __init__(self, role_description):
         self.chat_history = [{
             "role": "developer", 
-            "content": (
-                "You are an assistant for a 7-DOF Robot arm. Please rank ALL the following primitives and select the most useful primitives "
-                "to accomplish the given directive. Use 'stop' to indicate the last relevant primitive. Additionally, "
-                "for each primitive, output the corresponding coordinates in the Panda robot's link0 coordinate system. Each primitive "
-                "should be output in the format: 'PRIMITIVE x=... y=... z=...'."
-            )
+            "content": role_description,
 }]
 
         # Load API key
