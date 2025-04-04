@@ -11,11 +11,13 @@ export class Visualizer {
         width : 800,
         height : 600,
         antialias : true,
-        fixedFrame: 'scene_root'
+        fixedFrame: 'scene'
       });
 
-      // Add a grid.
       viewer.addObject(new ROS3D.Grid());
+      viewer.camera.position.x = 2;
+      viewer.camera.position.y = 2;
+      viewer.camera.position.z = 2;
 
       // Setup a client to listen to TFs.
       let tfClient = new ROSLIB.TFClient({
@@ -58,7 +60,7 @@ export class Visualizer {
       var imClient = new ROS3D.InteractiveMarkerClient({
         ros : this.ros,
         tfClient : tfMarkerClient,
-        topic : '/basic_controls',
+        topic : '/scene/object_controls',
         camera : viewer.camera,
         rootObject : viewer.selectableObjects
       });

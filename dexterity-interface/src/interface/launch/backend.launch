@@ -20,7 +20,7 @@
     <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" /> -->
 
     <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
-        <remap from="topic_ns" to="/basic_controls" />
+        <remap from="topic_ns" to="/scene/object_controls" />
         <remap from="target_frame" to="/scene" />
     </node> 
     <node pkg="interface" type="scene_handler.py" name="scene_handler" output="screen" />

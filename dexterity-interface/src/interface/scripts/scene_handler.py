@@ -12,52 +12,39 @@ from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
 from geometry_msgs.msg import Point
 from tf.broadcaster import TransformBroadcaster
+from std_msgs.msg import Header
+from interface.msg import Object, ObjectArray
 
-from random import random
-from math import sin
 
 
 class SceneHandler:
     def __init__(self):
         rospy.init_node('scene_handler')
     
-
-        self.server = None
-        self.menu_handler = MenuHandler()
-        self.br = None
-        self.counter = 0
-
-    
+        self.server = InteractiveMarkerServer("scene/object_controls")
         self.br = TransformBroadcaster()
-        
-        # create a timer to update the published transforms
-        rospy.Timer(rospy.Duration(0.01), self.frameCallback)
+        self.object_pub = rospy.Publisher("/scene/objects", ObjectArray, queue_size=10)
 
-        self.server = InteractiveMarkerServer("basic_controls")
+        self.objects = {}  # Dictionary of current objects in scene
+        self.object_idx = 0  # Name of marker needs to be unique or won't show
 
-        self.menu_handler.insert( "First Entry", callback=self.processFeedback )
-        self.menu_handler.insert( "Second Entry", callback=self.processFeedback )
+        # Timer to publish transforms and monitor objects in scene
+        rospy.Timer(rospy.Duration(0.01), self.object_watcher_callback)
+        rospy.Timer(rospy.Duration(0.01), self.frame_callback)
     
-        
-        position = Point(1, 0, 0)
-        self.makeMenuMarker('base_link', 'apple', position )
-
-        position = Point(2, 0, 0)
-        self.makeMenuMarker('base_link','bannana', position )
-        
-
-        self.server.applyChanges()
 
         rospy.spin()
 
 
-    def frameCallback(self, msg ):
+    def frame_callback(self, msg ):
         time = rospy.Time.now()
-        self.br.sendTransform( (0, 0, 0), (0, 0, 0, 1.0), time, "scene", "base_link" )
-        self.counter += 1
 
-    def processFeedback(self, feedback ):
-        s = "Feedback from marker '" + feedback.marker_name
+        for _, obj in self.objects.items():
+            self.br.sendTransform( (obj['frame_x'], obj['frame_y'], obj['frame_z']), (0, 0, 0, 1.0), time, obj['frame_id'], "scene")
+
+
+    def process_feedback(self, feedback ):
+        s = "Feedback from object '" + feedback.marker_name
         s += "' / control '" + feedback.control_name + "'"
 
         mp = ""
@@ -81,67 +68,94 @@ class SceneHandler:
         self.server.applyChanges()
 
 
-    def makeBox(self, msg ):
-        marker = Marker()
 
+    def add_object(self, id, description, x, y, z, length, width, height) -> str:
+        """
+        id: MUST BE UNIQUE per object
+        """
+        
+        frame_id = f"object/{id}"
+        object = InteractiveMarker()
+        object.header.frame_id = frame_id 
+        object.pose.position = Point(0,0,0)
+        object.scale = 1
+        object.name = id 
+
+        # make one control using default visuals
+        control = InteractiveMarkerControl()
+        control.interaction_mode = InteractiveMarkerControl.BUTTON
+        object.controls.append(copy.deepcopy(control))
+
+        marker = Marker()
         marker.type = Marker.CUBE
-        marker.scale.x = msg.scale * 0.45
-        marker.scale.y = msg.scale * 0.45
-        marker.scale.z = msg.scale * 0.45
-        marker.color.r = 0.5
+        marker.scale.x = length
+        marker.scale.y = width
+        marker.scale.z = height
+        marker.color.r = 1
         marker.color.g = 0.5
         marker.color.b = 0.5
         marker.color.a = 1.0
 
-        return marker
+        # Add text marker for description label
+        text_marker = Marker()
+        text_marker.type = Marker.TEXT_VIEW_FACING
+        text_marker.text = description
+        text_marker.scale.x = width
+        text_marker.color.r = 1.0
+        text_marker.color.g = 1.0
+        text_marker.color.b = 1.0
+        text_marker.color.a = 1.0
+        text_marker.pose.position.z = z + height/2 + 0.05 # A bit above the object
 
-    def makeBoxControl(self, msg ):
-        control =  InteractiveMarkerControl()
-        control.always_visible = True
-        control.markers.append( self.makeBox(msg) )
-        msg.controls.append( control )
-        return control
-
-    def saveMarker(self, int_marker ):
-        self.server.insert(int_marker, self.processFeedback)
-
-
-    #####################################################################
-    # Marker Creation
-
-    def normalizeQuaternion(self, quaternion_msg ):
-        norm = quaternion_msg.x**2 + quaternion_msg.y**2 + quaternion_msg.z**2 + quaternion_msg.w**2
-        s = norm**(-0.5)
-        quaternion_msg.x *= s
-        quaternion_msg.y *= s
-        quaternion_msg.z *= s
-        quaternion_msg.w *= s
-
-
-    def makeMenuMarker(self, frame_id, description, position):
-        int_marker = InteractiveMarker()
-        int_marker.header.frame_id = frame_id # "base_link"
-        int_marker.pose.position = position
-        int_marker.scale = 1
-
-        int_marker.name = description #"context_menu" # REQUIRES UNIQUE NAME
-        # int_marker.description = "Context Menu\n(Right Click)"
-
-        # make one control using default visuals
-        control = InteractiveMarkerControl()
-        control.interaction_mode = InteractiveMarkerControl.MENU
-        control.description = description #"Apple"
-        # control.name = "menu_only_control"
-        int_marker.controls.append(copy.deepcopy(control))
-
-        # make one control showing a box
-        marker = self.makeBox( int_marker )
         control.markers.append( marker )
-        control.always_visible = True
-        int_marker.controls.append(control)
+        control.markers.append(text_marker)
 
-        self.server.insert(int_marker, self.processFeedback)
-        self.menu_handler.apply( self.server, int_marker.name )
+        control.always_visible = True
+        object.controls.append(control)
+
+        self.server.insert(object, self.process_feedback)
+        self.server.applyChanges()
+
+        self.object_idx += 1
+
+        self.objects[id] = {
+            'frame_id': object.header.frame_id,
+            'description': description,
+            'frame_x': x,
+            'frame_y': y,
+            'frame_z': z,
+        }
+
+    
+
+    def object_watcher_callback(self, msg):
+        # TODO Connect to VLM
+
+        if not self.objects: # Only add if objects list is empty (first time called)
+            self.add_object(id= 'apple_1', description='apple', 
+                            x=0.5, y=0, z=0.05, length=0.1, width=0.1, height=0.1 )
+            
+            self.add_object(id= 'bread_1',  description='bread', 
+                    x=0.5, y=0.2, z=0.05, length=0.1, width=0.1, height=0.1 )
+            
+            self.add_object(id= 'peanut_butter_1',  description='peanut butter jar', 
+                    x=0.5, y=-0.2, z=0.05, length=0.1, width=0.1, height=0.1 )
+
+        msg = ObjectArray()
+        for id, obj in self.objects.items():
+            obj_msg = Object()
+            obj_msg.header = Header()
+            obj_msg.id =id
+            obj_msg.header.stamp = rospy.Time.now()
+            obj_msg.description = obj['description']
+            obj_msg.x = obj['frame_x']
+            obj_msg.y = obj['frame_y']
+            obj_msg.z = obj['frame_z']
+            msg.objects.append(obj_msg)
+
+        self.object_pub.publish(msg)
+
+        
 
 
 if __name__=="__main__":
