@@ -101,7 +101,6 @@ source devel/setup.bash
 
 roslaunch interface backend.launch
 
-rosrun interface llm_handler.py
 
 
 # Troubleshooting
@@ -121,3 +120,5 @@ https://github.com/Mechazo11/interactive_marker_proxy_noetic
 https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
 http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
 
+
+https://robotwebtools.github.io/ros3djs/

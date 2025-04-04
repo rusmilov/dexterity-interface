@@ -11,7 +11,7 @@ export class Visualizer {
         width : 800,
         height : 600,
         antialias : true,
-        fixedFrame: 'panda_link0'
+        fixedFrame: 'scene_root'
       });
 
       // Add a grid.
@@ -35,6 +35,35 @@ export class Visualizer {
         rootObject : viewer.selectableObjects,
         loader : ROS3D.COLLADA_LOADER_2
       });
+
+      // Setup a client to listen to TFs.
+      var tfMarkerClient = new ROSLIB.TFClient({
+        ros : this.ros,
+        angularThres : 0.01,
+        transThres : 0.01,
+        rate : 10.0,
+        fixedFrame : '/scene_root'
+      });
+
+      // // Setup the marker client.
+      // var markerClient = new ROS3D.MarkerClient({
+      //   ros : this.ros,
+      //   tfClient : tfMarkerClient,
+      //   topic : '/visualization_marker',
+      //   rootObject : viewer.scene,
+      // });
+
+
+      // Setup the marker client.
+      var imClient = new ROS3D.InteractiveMarkerClient({
+        ros : ros,
+        tfClient : tfMarkerClient,
+        topic : '/basic_controls',
+        camera : viewer.camera,
+        rootObject : viewer.selectableObjects
+      });
+
+
     }
 
   }

@@ -7,10 +7,20 @@
     <param name="use_gui" value="true" />
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" /> -->
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_scene_root_tf" args="0 0 0 0 0 0 world scene_root" />
+    
     <node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 
-    
+    <!-- <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
+        <remap from="topic_ns" to="/visualization_marker" />
+        <remap from="target_frame" to="scene_root" />
+    </node>  -->
+
+    <!-- <node pkg="interface" type="scene_handler.py" name="visualization_marker" output="screen" /> -->
+
+
     <include file="$(find authoring)/launch/all.launch">
       <arg name="only_virtual" value="true" />
     </include>
@@ -18,12 +28,8 @@
     <!-- <node pkg="authoring" type="all.launch" name="authoring"/> -->
 
 
-    <!-- <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" />
+    <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" />
 
-    <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
-        <remap from="topic_ns" to="/basic_controls" />
-        <remap from="target_frame" to="/rotating_frame" />
-    </node> -->
 
     <!-- <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen"/> -->
     <!-- <node pkg="interface" type="llm_executor.py" name="llm_executor" /> -->

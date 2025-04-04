@@ -1,5 +1,5 @@
-/* Modified version of: https://github.com/Mechazo11/interactive_marker_proxy_noetic/blob/develop/src/proxy.cpp
- * Copyright (c) 2011, Willow Garage, Inc.
+/*
+ * Copyright (c) 2010, Willow Garage, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,280 +28,55 @@
  */
 
 
- #include <ros/ros.h>
+#include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
 
- #include <interactive_markers/interactive_marker_server.h>
- #include <interactive_markers/menu_handler.h>
- 
- #include <tf/transform_broadcaster.h>
- #include <tf/tf.h>
- 
- #include <math.h>
- #include <sensor_msgs/JointState.h>
+int main( int argc, char** argv )
+{
+  ros::init(argc, argv, "basic_shapes");
+  ros::NodeHandle n;
+  ros::Rate r(1.0/3.0);
+  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1, true);
 
-ros::Publisher joint_pub;
-std::map<std::string, double> joint_values;
- 
- using namespace visualization_msgs;
- std::map<std::string, geometry_msgs::Pose> marker_poses;
- 
- 
- // %Tag(vars)%
- boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
- interactive_markers::MenuHandler menu_handler;
- // %EndTag(vars)%
- 
- 
- // %Tag(Box)%
- Marker makeBox( InteractiveMarker &msg )
- {
-   Marker marker;
- 
-   marker.type = Marker::POINTS;
-   marker.scale.x = msg.scale * 0.5;
-   marker.scale.y = msg.scale * 0.5;
-   marker.scale.z = msg.scale * 0.5;
-   marker.color.r = 0.5;
-   marker.color.g = 0.5;
-   marker.color.b = 0.5;
-   marker.color.a = 1.0;
- 
-   return marker;
- }
- 
- InteractiveMarkerControl& makeBoxControl( InteractiveMarker &msg )
- {
-   InteractiveMarkerControl control;
-   control.always_visible = true;
-   control.markers.push_back( makeBox(msg) );
-   msg.controls.push_back( control );
- 
-   return msg.controls.back();
- }
- // %EndTag(Box)%
- 
- // %Tag(frameCallback)%
- void frameCallback(const ros::TimerEvent&)
- {
-   static uint32_t counter = 0;
- 
-   static tf::TransformBroadcaster br;
- 
-   tf::Transform t;
- 
-   ros::Time time = ros::Time::now();
+  uint32_t shape = visualization_msgs::Marker::CUBE;
 
-   sensor_msgs::JointState js;
-   js.header.stamp = ros::Time::now();
-   for (const auto& joint : joint_values)
-   {
-     js.name.push_back(joint.first);
-     js.position.push_back(joint.second);
-   }
-   joint_pub.publish(js);
+  while (ros::ok())
+  {
+    visualization_msgs::Marker marker;
 
-  //  marker_poses.clear();
-  
-  //  // No transformation right now
-  //  t.setOrigin(tf::Vector3(0.0, 0.0, 0));
-  //  t.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
-  //  br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "moving_frame"));
- 
-   t.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
-   t.setRotation(tf::createQuaternionFromRPY(0.0, 0, 0.0));
-   br.sendTransform(tf::StampedTransform(t, time, "panda_link0", "rotating_frame"));
- 
-   counter++;
- }
- // %EndTag(frameCallback)%
- 
- // %Tag(processFeedback)%
- void processFeedback( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
- {
+    marker.header.frame_id = "/scene_root";
+    marker.header.stamp = ros::Time::now();
 
-  std::string original = feedback->marker_name;
+    marker.ns = "basic_shapes";
+    marker.id = 0;
 
-  // Replace "link" with "joint"
-  std::string joint_name = original;
-  size_t pos = joint_name.find("link");
-  if (pos != std::string::npos) {
-    joint_name.replace(pos, 4, "joint");
+    marker.type = visualization_msgs::Marker::CYLINDER;
+
+    marker.action = visualization_msgs::Marker::ADD;
+
+    marker.pose.position.x = 0;
+    marker.pose.position.y = 0;
+    marker.pose.position.z = 0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+
+    marker.scale.x = 1.0;
+    marker.scale.y = 1.0;
+    marker.scale.z = 1.0;
+
+    marker.color.r = 0.0f;
+    marker.color.g = 1.0f;
+    marker.color.b = 0.0f;
+    marker.color.a = 1.0;
+
+    marker.lifetime = ros::Duration(0);  // Forever
+
+
+    marker_pub.publish(marker);
+
+    r.sleep();
   }
 
-  tf::Quaternion tf_quat;
-  tf::quaternionMsgToTF(feedback->pose.orientation, tf_quat);
-  // Get Euler angles
-  double roll, pitch, yaw;
-  tf::Matrix3x3(tf_quat).getRPY(roll, pitch, yaw);
-  joint_values[joint_name] = yaw;
-
-
-   std::ostringstream s;
-   s << "Feedback from marker '" << feedback->marker_name << "' "
-       << " / control '" << feedback->control_name << "'";
- 
-   std::ostringstream mouse_point_ss;
-   if( feedback->mouse_point_valid )
-   {
-     mouse_point_ss << " at " << feedback->mouse_point.x
-                    << ", " << feedback->mouse_point.y
-                    << ", " << feedback->mouse_point.z
-                    << " in frame " << feedback->header.frame_id;
-   }
- 
-   switch ( feedback->event_type )
-   {
-
-     case visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE:
-       ROS_INFO_STREAM( s.str() << ": pose changed"
-           << "\nposition = "
-           << feedback->pose.position.x
-           << ", " << feedback->pose.position.y
-           << ", " << feedback->pose.position.z
-           << "\norientation = "
-           << feedback->pose.orientation.w
-           << ", " << feedback->pose.orientation.x
-           << ", " << feedback->pose.orientation.y
-           << ", " << feedback->pose.orientation.z
-           << "\nframe: " << feedback->header.frame_id
-           << " time: " << feedback->header.stamp.sec << "sec, "
-           << feedback->header.stamp.nsec << " nsec" );
-       break;
- 
-     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_DOWN:
-       ROS_INFO_STREAM( s.str() << ": mouse down" << mouse_point_ss.str() << "." );
-       break;
- 
-     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
-       ROS_INFO_STREAM( s.str() << ": mouse up" << mouse_point_ss.str() << "." );
-       break;
-   }
- 
-   server->applyChanges();
- }
- // %EndTag(processFeedback)%
- 
- // %Tag(alignMarker)%
- void alignMarker( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
- {
-   geometry_msgs::Pose pose = feedback->pose;
- 
-   pose.position.x = round(pose.position.x-0.5)+0.5;
-   pose.position.y = round(pose.position.y-0.5)+0.5;
- 
-   ROS_INFO_STREAM( feedback->marker_name << ":"
-       << " aligning position = "
-       << feedback->pose.position.x
-       << ", " << feedback->pose.position.y
-       << ", " << feedback->pose.position.z
-       << " to "
-       << pose.position.x
-       << ", " << pose.position.y
-       << ", " << pose.position.z );
- 
-   server->setPose( feedback->marker_name, pose );
-   server->applyChanges();
- }
- // %EndTag(alignMarker)%
- 
- double rand( double min, double max )
- {
-   double t = (double)rand() / (double)RAND_MAX;
-   return min + t*(max-min);
- }
- 
- ////////////////////////////////////////////////////////////////////////////////////
- 
- // %Tag(6DOF)%
- void make6DofMarker(std::string frame_id, bool fixed, unsigned int interaction_mode, const tf::Vector3& position, bool show_6dof )
- {
-   InteractiveMarker int_marker;
-   int_marker.header.frame_id = frame_id;
-   tf::pointTFToMsg(position, int_marker.pose.position);
-   int_marker.scale = 0.5;
- 
-   int_marker.name = frame_id;
-   int_marker.description = "Simple 6-DOF Control";
- 
-   // insert a box
-   makeBoxControl(int_marker);
-   int_marker.controls[0].interaction_mode = interaction_mode;
- 
-   InteractiveMarkerControl control;
- 
-   if ( fixed )
-   {
-     int_marker.name += "_fixed";
-     int_marker.description += "\n(fixed orientation)";
-     control.orientation_mode = InteractiveMarkerControl::FIXED;
-   }
- 
-   if (interaction_mode != visualization_msgs::InteractiveMarkerControl::NONE)
-   {
-       std::string mode_text;
-       if( interaction_mode == visualization_msgs::InteractiveMarkerControl::MOVE_3D )         mode_text = "MOVE_3D";
-       if( interaction_mode == visualization_msgs::InteractiveMarkerControl::ROTATE_3D )       mode_text = "ROTATE_3D";
-       if( interaction_mode == visualization_msgs::InteractiveMarkerControl::MOVE_ROTATE_3D )  mode_text = "MOVE_ROTATE_3D";
-       int_marker.name += "_" + mode_text;
-       int_marker.description = std::string("3D Control") + (show_6dof ? " + 6-DOF controls" : "") + "\n" + mode_text;
-   }
- 
-   if(show_6dof)
-   {
-      // Set control orientation to Y-axis
-      tf::Quaternion orien(0.0, 1.0, 0.0, 1.0);  // Y-axis
-      orien.normalize();
-      tf::quaternionTFToMsg(orien, control.orientation);
-
-      control.name = "rotate_y";
-      control.interaction_mode = InteractiveMarkerControl::ROTATE_AXIS;
-      int_marker.controls.push_back(control);
-   }
- 
-   server->insert(int_marker);
-   server->setCallback(int_marker.name, &processFeedback);
-   if (interaction_mode != visualization_msgs::InteractiveMarkerControl::NONE)
-     menu_handler.apply( *server, int_marker.name );
- }
- // %EndTag(6DOF)%
- 
- 
- 
- // %Tag(main)%
- int main(int argc, char** argv)
- {
-  
-   ros::init(argc, argv, "basic_controls");
-   ros::NodeHandle n;
-
-   ros::Duration(1.0).sleep();
- 
-   // create a timer to update the published transforms
-   ros::Timer frame_timer = n.createTimer(ros::Duration(0.01), frameCallback);
-
-   joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 10);
- 
-   server.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
- 
-   ros::Duration(0.1).sleep();
- 
-  //  menu_handler.insert( "First Entry", &processFeedback );
-  //  menu_handler.insert( "Second Entry", &processFeedback );
-  //  interactive_markers::MenuHandler::EntryHandle sub_menu_handle = menu_handler.insert( "Submenu" );
-  //  menu_handler.insert( sub_menu_handle, "First Entry", &processFeedback );
-  //  menu_handler.insert( sub_menu_handle, "Second Entry", &processFeedback );
- 
-   tf::Vector3 position;
-   position = tf::Vector3(0, 0, 0);
-   make6DofMarker( "panda_link1", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
-   make6DofMarker( "panda_link5", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
-   make6DofMarker( "panda_link7", false, visualization_msgs::InteractiveMarkerControl::NONE, position, true );
-
-  
-   server->applyChanges();
- 
-   ros::spin();
- 
-   server.reset();
- }
- // %EndTag(main)%
+}
