@@ -42,7 +42,7 @@ export class Visualizer {
         angularThres : 0.01,
         transThres : 0.01,
         rate : 10.0,
-        fixedFrame : '/scene_root'
+        fixedFrame : '/world'
       });
 
       // // Setup the marker client.
@@ -54,9 +54,8 @@ export class Visualizer {
       // });
 
 
-      // Setup the marker client.
       var imClient = new ROS3D.InteractiveMarkerClient({
-        ros : ros,
+        ros : this.ros,
         tfClient : tfMarkerClient,
         topic : '/basic_controls',
         camera : viewer.camera,

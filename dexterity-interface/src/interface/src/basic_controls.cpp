@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2010, Willow Garage, Inc.
+/* Modified version of: https://github.com/ros-visualization/visualization_tutorials/blob/noetic-devel/interactive_marker_tutorials/src/basic_controls.cpp
+ * Copyright (c) 2011, Willow Garage, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,55 +28,144 @@
  */
 
 
-#include <ros/ros.h>
-#include <visualization_msgs/Marker.h>
+ #include <ros/ros.h>
 
-int main( int argc, char** argv )
-{
-  ros::init(argc, argv, "basic_shapes");
-  ros::NodeHandle n;
-  ros::Rate r(1.0/3.0);
-  ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1, true);
+ #include <interactive_markers/interactive_marker_server.h>
+ #include <interactive_markers/menu_handler.h>
+ 
+ #include <tf/transform_broadcaster.h>
+ #include <tf/tf.h>
+ 
+ #include <math.h>
+ 
+ using namespace visualization_msgs;
+ 
+ 
+ boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
+ interactive_markers::MenuHandler menu_handler;
 
-  uint32_t shape = visualization_msgs::Marker::CUBE;
-
-  while (ros::ok())
-  {
-    visualization_msgs::Marker marker;
-
-    marker.header.frame_id = "/scene_root";
-    marker.header.stamp = ros::Time::now();
-
-    marker.ns = "basic_shapes";
-    marker.id = 0;
-
-    marker.type = visualization_msgs::Marker::CYLINDER;
-
-    marker.action = visualization_msgs::Marker::ADD;
-
-    marker.pose.position.x = 0;
-    marker.pose.position.y = 0;
-    marker.pose.position.z = 0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-
-    marker.scale.x = 1.0;
-    marker.scale.y = 1.0;
-    marker.scale.z = 1.0;
-
-    marker.color.r = 0.0f;
-    marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
-    marker.color.a = 1.0;
-
-    marker.lifetime = ros::Duration(0);  // Forever
+ 
+ Marker makeBox( InteractiveMarker &msg )
+ {
+   Marker marker;
+ 
+   marker.type = Marker::CUBE;
+   marker.scale.x = msg.scale * 0.45;
+   marker.scale.y = msg.scale * 0.45;
+   marker.scale.z = msg.scale * 0.45;
+   marker.color.r = 0.5;
+   marker.color.g = 0.5;
+   marker.color.b = 0.5;
+   marker.color.a = 1.0;
+ 
+   return marker;
+ }
+ 
 
 
-    marker_pub.publish(marker);
+ void frameCallback(const ros::TimerEvent&)
+ {
+   static uint32_t counter = 0;
+ 
+   static tf::TransformBroadcaster br;
+ 
+   tf::Transform t;
+ 
+   ros::Time time = ros::Time::now();
+ 
+   t.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+   t.setRotation(tf::createQuaternionFromRPY(0.0, 0, 0.0));
+   br.sendTransform(tf::StampedTransform(t, time, "world", "base_link"));
+ 
+   counter++;
+ }
 
-    r.sleep();
-  }
+ void processFeedback( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
+ {
+   std::ostringstream s;
+   s << "Feedback from marker '" << feedback->marker_name << "' "
+       << " / control '" << feedback->control_name << "'";
+ 
+   std::ostringstream mouse_point_ss;
+   if( feedback->mouse_point_valid )
+   {
+     mouse_point_ss << " at " << feedback->mouse_point.x
+                    << ", " << feedback->mouse_point.y
+                    << ", " << feedback->mouse_point.z
+                    << " in frame " << feedback->header.frame_id;
+   }
+ 
+   switch ( feedback->event_type )
+   {
 
-}
+     case visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT:
+       ROS_INFO_STREAM( s.str() << ": menu item " << feedback->menu_entry_id << " clicked" << mouse_point_ss.str() << "." );
+       break;
+ 
+     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_DOWN:
+       ROS_INFO_STREAM( s.str() << ": mouse down" << mouse_point_ss.str() << "." );
+       break;
+ 
+     case visualization_msgs::InteractiveMarkerFeedback::MOUSE_UP:
+       ROS_INFO_STREAM( s.str() << ": mouse up" << mouse_point_ss.str() << "." );
+       break;
+   }
+ 
+   server->applyChanges();
+ }
+
+ 
+ 
+ void makeMenuMarker( const tf::Vector3& position )
+ {
+   InteractiveMarker int_marker;
+   int_marker.header.frame_id = "base_link";
+   tf::pointTFToMsg(position, int_marker.pose.position);
+   int_marker.scale = 1;
+ 
+   int_marker.name = "context_menu";
+   int_marker.description = "Context Menu\n(Right Click)";
+ 
+   InteractiveMarkerControl control;
+ 
+   control.interaction_mode = InteractiveMarkerControl::MENU;
+   control.name = "menu_only_control";
+ 
+   Marker marker = makeBox( int_marker );
+   control.markers.push_back( marker );
+   control.always_visible = true;
+   int_marker.controls.push_back(control);
+ 
+   server->insert(int_marker);
+   server->setCallback(int_marker.name, &processFeedback);
+   menu_handler.apply( *server, int_marker.name );
+ }
+
+
+ int main(int argc, char** argv)
+ {
+   ros::init(argc, argv, "basic_controls");
+   ros::NodeHandle n;
+ 
+   // create a timer to update the published transforms
+   ros::Timer frame_timer = n.createTimer(ros::Duration(0.01), frameCallback);
+ 
+   server.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
+ 
+   ros::Duration(0.1).sleep();
+ 
+   menu_handler.insert( "First Entry", &processFeedback );
+   menu_handler.insert( "Second Entry", &processFeedback );
+
+   tf::Vector3 position;
+   position = tf::Vector3(0, 1, 0);
+
+   makeMenuMarker( position );
+
+   server->applyChanges();
+ 
+   ros::spin();
+ 
+   server.reset();
+ }
+ // %EndTag(main)%
