@@ -40,7 +40,7 @@ class SceneHandler:
         time = rospy.Time.now()
 
         for _, obj in self.objects.items():
-            self.br.sendTransform( (obj['frame_x'], obj['frame_y'], obj['frame_z']), (0, 0, 0, 1.0), time, obj['frame_id'], "scene")
+            self.br.sendTransform( (obj.x, obj.y, obj.z), (0, 0, 0, 1.0), time, obj.frame_id, "scene")
 
 
     def process_feedback(self, feedback ):
@@ -73,7 +73,7 @@ class SceneHandler:
         """
         id: MUST BE UNIQUE per object
         """
-        
+
         frame_id = f"object/{id}"
         object = InteractiveMarker()
         object.header.frame_id = frame_id 
@@ -118,13 +118,19 @@ class SceneHandler:
 
         self.object_idx += 1
 
-        self.objects[id] = {
-            'frame_id': object.header.frame_id,
-            'description': description,
-            'frame_x': x,
-            'frame_y': y,
-            'frame_z': z,
-        }
+        obj = Object()
+        obj.header = Header()
+        obj.header.stamp = rospy.Time.now()
+        obj.id =id
+        obj.frame_id = frame_id
+        obj.description =description
+        obj.x = x
+        obj.y = y
+        obj.width = width
+        obj.length = length
+        obj.height = height
+
+        self.objects[id] = obj
 
     
 
@@ -133,25 +139,17 @@ class SceneHandler:
 
         if not self.objects: # Only add if objects list is empty (first time called)
             self.add_object(id= 'apple_1', description='apple', 
-                            x=0.5, y=0, z=0.05, length=0.1, width=0.1, height=0.1 )
+                            x=0.5, y=0, z=0.025, length=0.05, width=0.05, height=0.05 )
             
             self.add_object(id= 'bread_1',  description='bread', 
-                    x=0.5, y=0.2, z=0.05, length=0.1, width=0.1, height=0.1 )
+                    x=0.5, y=0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
             
             self.add_object(id= 'peanut_butter_1',  description='peanut butter jar', 
-                    x=0.5, y=-0.2, z=0.05, length=0.1, width=0.1, height=0.1 )
+                    x=0.5, y=-0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
 
         msg = ObjectArray()
         for id, obj in self.objects.items():
-            obj_msg = Object()
-            obj_msg.header = Header()
-            obj_msg.id =id
-            obj_msg.header.stamp = rospy.Time.now()
-            obj_msg.description = obj['description']
-            obj_msg.x = obj['frame_x']
-            obj_msg.y = obj['frame_y']
-            obj_msg.z = obj['frame_z']
-            msg.objects.append(obj_msg)
+            msg.objects.append(obj)
 
         self.object_pub.publish(msg)
 
