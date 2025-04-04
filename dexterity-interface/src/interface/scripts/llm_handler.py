@@ -2,12 +2,16 @@
 import rospy, os
 from llm_interface import LLMInterface
 from std_msgs.msg import String
+from interface.msg import Object, ObjectArray
 
 
 
 class LLMHandler():
     def __init__(self):
         rospy.init_node('llm_handler')
+
+        self.current_objects = {}
+        rospy.Subscriber("/scene/objects", ObjectArray, self.object_sub)
 
         primitives = {
             "PICK":
@@ -49,7 +53,10 @@ class LLMHandler():
         self.llm = LLMInterface(llm_role)
 
 
-        example_query = "Directive: Open a jar. Assume jar base is already stabilized. Objects: {'jar': (0.8, 0.4, 0.2), 'apple': (0.5, -0.4, 0.2)}"
+        example_query = "Directive: Open a jar. Assume jar base is already stabilized." \
+            + "Objects: {'jar_1': {'description': 'jar, 'x':0.8, 'y': 0.4, 'z':0.2, 'length': 0.08, 'height': 0.12}," \
+            + "'apple_1': {'description': 'apple', 'x': 0.5, 'y': -0.4, 'z': 0.2, 'length': 0.08, 'width': 0.08, 'height': 0.08}}"
+        
         example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. STOP\n"
         self.llm.init_history(example_query, example_response)
 
@@ -58,10 +65,9 @@ class LLMHandler():
         self.llm_response_pub = rospy.Publisher("/llm_response", String, queue_size=10)
         rospy.Subscriber("/user_response", String, self.user_response_callback)
 
+
     def user_response_callback(self, msg):
-        
-        scene_objects = self.get_current_objects()
-        output = self.llm.query_openai("Directive: " + msg.data + 'Objects: ' + scene_objects)
+        output = self.llm.query_openai("Directive: " + msg.data + 'Objects: ' + str(self.current_objects))
         commands = output.choices[0].message.content
         self.llm_response_pub.publish(commands)
         self.llm_exec_pub.publish(commands)
@@ -70,19 +76,20 @@ class LLMHandler():
         rospy.loginfo("All commands have been published as a single message. Waiting for subscribers to process...")
 
 
-    def get_current_objects(self):
+    def object_sub(self, msg):
 
-        # TODO VLM INTERFACE with ros HERE
+        for obj in msg.objects:
+            self.current_objects[obj.id]  = {
+                'description': obj.description, 
+                'x': obj.x,
+                'y': obj.y,
+                'z': obj.z,
+                'length': obj.length,
+                'width':  obj.width,
+                'height': obj.height,
+            }
 
-        objects = {
-            'apple': (0.5, 0, 0),
-            'bread': (0.5, 0.2, 0),
-            'peanut butter jar': (0.5,-0.2, 1)
-        }
-
-        return str(objects)
         
-
 if __name__ == "__main__":
     llm_handler = LLMHandler()
     rospy.spin()  # Keep the node running
