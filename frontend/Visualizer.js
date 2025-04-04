@@ -42,7 +42,8 @@ export class Visualizer {
         angularThres : 0.01,
         transThres : 0.01,
         rate : 10.0,
-        fixedFrame : '/world'
+        // fixedFrame : '/world'
+        fixedFrame: '/scene'
       });
 
       // // Setup the marker client.

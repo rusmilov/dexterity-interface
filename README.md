@@ -93,6 +93,7 @@ Mya notes, please ignore:
 # catkin build
 
 cd dexterity-interface
+chmod +x src/interface/scripts/*
 catkin build
 
 

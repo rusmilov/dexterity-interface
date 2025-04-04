@@ -14,14 +14,17 @@
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
 
     <!-- <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
-        <remap from="topic_ns" to="/visualization_marker" />
-        <remap from="target_frame" to="scene_root" />
-    </node>  -->
-
-    <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
         <remap from="topic_ns" to="/basic_controls" />
         <remap from="target_frame" to="/world" />
     </node> 
+    <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" /> -->
+
+    <node name="proxy" pkg="interactive_marker_proxy" type="proxy" output="screen">
+        <remap from="topic_ns" to="/basic_controls" />
+        <remap from="target_frame" to="/scene" />
+    </node> 
+    <node pkg="interface" type="scene_handler.py" name="scene_handler" output="screen" />
+    <!-- <node name="basic_controls" pkg="interface" type="basic_controls.py" output="screen" /> -->
 
     <!-- <node pkg="interface" type="scene_handler.py" name="visualization_marker" output="screen" /> -->
 
@@ -33,7 +36,7 @@
     <!-- <node pkg="authoring" type="all.launch" name="authoring"/> -->
 
 
-    <node name="basic_controls" pkg="interface" type="basic_controls" output="screen" />
+    
 
 
     <!-- <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen"/> -->
