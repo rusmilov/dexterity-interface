@@ -47,13 +47,5 @@ WORKDIR /workspace/
 # Install python packages
 RUN pip install -r requirements.txt
 
-# Compile panda-primitives package
-WORKDIR /workspace/panda-primitives/
-RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&  catkin build authoring"
-WORKDIR /workspace/
-
-# Automatically load ROS environment when entering the terminal
-RUN echo "source /workspace/panda-primitives/devel/setup.bash" >> ~/.bashrc
-
 # Set the default command to execute
 CMD ["bash"]

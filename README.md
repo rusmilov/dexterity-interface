@@ -31,15 +31,20 @@ You will need:
 
     sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host llm-control
     ```
-### 4 Compile ros packages
+### 4. Compile ros packages
+
+This is a bit over-complicated due to having multiple workspaces. Turning some of these workspaces into packages is a future TODO item.
 ```bash
 cd panda-primitives
-catkin build
+catkin build authoring
 source devel/setup.bash
+
 cd ../dexterity-interface
 catkin build
 source devel/setup.bash
+
 ```
+
 <!-- 
 ### 4.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
 This step will compile panda-primitives-control package that control Panda Robot in low level, you can skip it if you only need simulation
@@ -87,11 +92,13 @@ For more information, please refer to [panda-primitives-control](https://github.
 
 
 ## Running
-1. Launch the Backend
-```bash
-# Make sure you are in `dexterity-interface/`
-roslaunch interface backend.launch
-```
+1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running this command:
+    ```bash
+    roslaunch interface backend.launch
+    ```
+
+    Note: If you run into an issue with catkin not being able to find the authoring package, please run `catkin clean -y` in the `dexterity-interface/` and the `panda-primitives/` directories and then redo Step 4 in the setup. After that, this command should work.
+
 
 2. Launch a live server for `frontend/index.html`. If you are using VScode, you can do that by selecting that file to open it, and in the lower right of VSCode click "Go Live". This should launch the interface in your browser.
     
@@ -109,13 +116,9 @@ rosrun tf2_tools view_frames.py
 
 * https://github.com/cruise-automation/webviz
 * https://github.com/osrf/rvizweb
-
 * https://robotwebtools.github.io/
-
-https://github.com/Mechazo11/interactive_marker_proxy_noetic
-https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
-http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
-
-
-https://robotwebtools.github.io/ros3djs/
-https://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/InteractiveMarkerControl.html
+* https://github.com/Mechazo11/interactive_marker_proxy_noetic
+* https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
+* http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
+* https://robotwebtools.github.io/ros3djs/
+* https://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/InteractiveMarkerControl.html
