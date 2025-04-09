@@ -24,18 +24,24 @@ You will need:
     ```bash
     git submodule update --init --recursive
     ```
-2. Setup display forwarding:
-    ```bash
-    xhost +local:
-    ```
+
 3. Now  build the container image and start the container. Make sure you are in this root directory. These commands mount on the current directory as the containers file system so any changes you make to the files on your host machine will be mirrored in the container. These commands also allow the containers display to be forwarded to your host machine so that you can see it.
     ```bash
     sudo docker build -t llm-control .
 
     sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host llm-control
     ```
-
-### 3.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
+### 4 Compile ros packages
+```bash
+cd panda-primitives
+catkin build
+source devel/setup.bash
+cd ../dexterity-interface
+catkin build
+source devel/setup.bash
+```
+<!-- 
+### 4.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
 This step will compile panda-primitives-control package that control Panda Robot in low level, you can skip it if you only need simulation
 
 1. Add necessary environment variables: Replace with your Panda's IP
@@ -77,41 +83,18 @@ This step will compile panda-primitives-control package that control Panda Robot
 		```bash
 		roslaunch controller mover_test.launch
 		```
-For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control)
+For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control) -->
 
 
 ## Running
 1. Launch the Backend
 ```bash
-cd dexterity-interface
-source devel/setup.bash
+# Make sure you are in `dexterity-interface/`
 roslaunch interface backend.launch
 ```
+
 2. Launch a live server for `frontend/index.html`. If you are using VScode, you can do that by selecting that file to open it, and in the lower right of VSCode click "Go Live". This should launch the interface in your browser.
     
-
-
-Mya notes, please ignore:
-```bash
-# cd panda-primitives
-# catkin build
-
-cd dexterity-interface
-chmod +x src/interface/scripts/*
-catkin build
-
-
-# source ../panda-primitives/devel/setup.bash
-source devel/setup.bash
-
-roslaunch interface backend.launch
-
-
-
-# Troubleshooting
-rosrun tf2_tools view_frames.py
-```
-
 
 ## Troubleshooting
 
