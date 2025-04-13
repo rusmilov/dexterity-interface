@@ -1,0 +1,2 @@
+#ObjectArray.msg
+Object[] objects
