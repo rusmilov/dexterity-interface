@@ -5,4 +5,5 @@ venv/
 logs/
 build/
 devel/
-.catkin_tools/
+*catkin_tools/
+__pycache__
