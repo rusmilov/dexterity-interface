@@ -31,10 +31,18 @@ You will need:
     ```
 
 3. Now  build the container image and start the container. Make sure you are in this root directory. These commands mount on the current directory as the containers file system so any changes you make to the files on your host machine will be mirrored in the container. These commands also allow the containers display to be forwarded to your host machine so that you can see it.
+
+    If you don't need the Kinect, run:
     ```bash
     sudo docker build -t llm-control .
 
     sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host llm-control
+    ```
+
+    If you do need the Kinect, run:
+    ```bash
+    sudo docker build -t llm-control-kinect .
+    sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host llm-control-kinect
     ```
 ### 4. Compile ros packages
 

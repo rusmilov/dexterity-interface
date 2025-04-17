@@ -1,49 +1,32 @@
-# Use ROS Noetic Desktop Full as the base image
+# Use an official ROS Noetic image with desktop-full
 FROM osrf/ros:noetic-desktop-full
 
-ARG DEBIAN_FRONTEND=noninteractive
-
-# Set up environment
+# Set environment variable to avoid user prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PULSE_SERVER=unix:/run/user/1000/pulse/native
 
-# Update and install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Update apt and install all required packages
+RUN chmod 1777 /tmp && \
+    apt-get update && \
+    apt-get install -y --fix-missing \
     curl \
-    wget \
-    ca-certificates \
+    python3-pip \
     build-essential \
     cmake \
     nano \
-    git \
-    python3-pip \
     libeigen3-dev \
     libpoco-dev \
-    libasound2 \
-    libasound2-plugins \
-    alsa-utils \
+    python3-rosdep \
+    python3-catkin-tools \
+    mesa-utils \
     pulseaudio \
     pulseaudio-utils \
-    usbutils \
-    v4l-utils \
-    mesa-utils \
-    libgl1-mesa-glx \
-    libgl1-mesa-dri \
-    libxi6 \
-    libxrender1 \
-    libxtst6 \
-    libusb-1.0-0-dev \
-    gnupg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-
-# Install core ROS & robotics dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3-catkin-tools \
-    ros-noetic-libfranka ros-noetic-franka-ros \
+    alsa-base \
+    alsa-utils \
+    libasound2 \
+    libasound2-plugins \
+    ros-noetic-libfranka \
+    ros-noetic-franka-ros \
     ros-noetic-urdfdom-py \
     ros-noetic-kdl-parser-py \
     ros-noetic-kdl-conversions \
@@ -53,20 +36,30 @@ RUN apt-get update && \
     ros-noetic-tf2-web-republisher \
     ros-noetic-interactive-marker-tutorials \
     ros-noetic-interactive-markers \
-    ros-noetic-tf2-tools
+    ros-noetic-tf2-tools \
+    ros-noetic-gazebo-ros-control \
+    ros-noetic-rospy-message-converter \
+    ros-noetic-effort-controllers \
+    ros-noetic-joint-state-controller \
+    ros-noetic-moveit \
+    ros-noetic-moveit-commander \
+    ros-noetic-moveit-visual-tools \
+    ros-noetic-rgbd-launch \
+    usbutils \
+    python3-tk \
+    v4l-utils
 
-
-# Add python alias to python3
-RUN ln -s /usr/bin/python3 /usr/bin/python || true
-
-# Install Azure Kinect SDK
+# Azure Kinect SDK dependencies
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     echo "deb [arch=amd64] https://packages.microsoft.com/ubuntu/18.04/prod bionic main" > /etc/apt/sources.list.d/microsoft-prod.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev && \
-    rm -rf /var/lib/apt/lists/*
+    ACCEPT_EULA=Y apt-get install -y \
+    k4a-tools \
+    libk4a1.4 \
+    libk4a1.4-dev
 
-
+# Add python alias to python3
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 COPY . /workspace
 WORKDIR /workspace
@@ -75,12 +68,10 @@ WORKDIR /workspace
 WORKDIR /workspace/panda-primitives-control/spacenavd
 RUN ./configure && make install
 
-
 WORKDIR /workspace
+RUN pip install -r requirements.txt 
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Expose PulseAudio socket for mic support
+# PulseAudio volume
 VOLUME ["/run/user/1000/pulse"]
 
 # Default command
