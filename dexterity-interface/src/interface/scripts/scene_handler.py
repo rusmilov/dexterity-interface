@@ -30,7 +30,6 @@ class SceneHandler:
         self.object_idx = 0  # Name of marker needs to be unique or won't show
 
         # Timer to publish transforms and monitor objects in scene
-        rospy.Timer(rospy.Duration(0.01), self.object_watcher_callback)
         rospy.Timer(rospy.Duration(0.01), self.frame_callback)
     
 

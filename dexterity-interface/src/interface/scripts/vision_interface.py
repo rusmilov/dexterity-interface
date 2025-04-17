@@ -21,7 +21,7 @@ class VisionInterface:
     
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
-        rospy.Timer(rospy.Duration(0.1), self.object_monitor_pub)
+        rospy.Timer(rospy.Duration(0.1), self.object_monitor)
 
 
         rospy.spin()
@@ -35,10 +35,11 @@ class VisionInterface:
         return M
     
 
-    def object_monitor_pub(self, msg):
-        # TODO Connect to VLM
+    def object_monitor(self, event):
+        print("MADE IT HERE!")
 
         objects = command(self.model, self.processor, "")
+        print("OBJECTS", objects)
 
         msg = ObjectArray()
         for objDict in objects:
@@ -59,8 +60,11 @@ class VisionInterface:
             obj.height = dim
 
             msg.objects.append(obj)
+            print("HERE", obj)
         
         # TODO convert to robot frame of reference
+
+        
 
         self.object_pub.publish(msg)
 

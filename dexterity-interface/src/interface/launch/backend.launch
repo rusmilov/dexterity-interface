@@ -12,6 +12,7 @@
         <remap from="target_frame" to="/scene" />
     </node> 
     <node pkg="interface" type="scene_handler.py" name="scene_handler" output="screen" />
+    <node pkg="interface" type="vision_interface.py" name="vision_interface" output="screen" />
 
 
   <!-- _____________________________ PANDA-PRIMITIVES LAUNCH _____________________________ -->
