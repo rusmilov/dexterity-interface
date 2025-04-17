@@ -23,6 +23,7 @@ class SceneHandler:
     
         self.server = InteractiveMarkerServer("scene/object_controls")
         self.br = TransformBroadcaster()
+        rospy.Subscriber("/scene/vision/objects", ObjectArray, self.vision_sub)
         self.object_pub = rospy.Publisher("/scene/objects", ObjectArray, queue_size=10)
 
         self.objects = {}  # Dictionary of current objects in scene
@@ -69,17 +70,17 @@ class SceneHandler:
 
 
 
-    def add_object(self, id, description, x, y, z, length, width, height) -> str:
+    def add_object(self, vision_obj: Object) -> str:
         """
-        id: MUST BE UNIQUE per object
+        vision_obj.id: MUST BE UNIQUE per object
         """
 
-        frame_id = f"object/{id}"
+        frame_id = f"object/{vision_obj.id}"
         object = InteractiveMarker()
         object.header.frame_id = frame_id 
         object.pose.position = Point(0,0,0)
         object.scale = 1
-        object.name = id 
+        object.name = vision_obj.id 
 
         # make one control using default visuals
         control = InteractiveMarkerControl()
@@ -88,9 +89,9 @@ class SceneHandler:
 
         marker = Marker()
         marker.type = Marker.CUBE
-        marker.scale.x = length
-        marker.scale.y = width
-        marker.scale.z = height
+        marker.scale.x = vision_obj.length
+        marker.scale.y = vision_obj.width
+        marker.scale.z = vision_obj.height
         marker.color.r = 1
         marker.color.g = 0.5
         marker.color.b = 0.5
@@ -99,13 +100,13 @@ class SceneHandler:
         # Add text marker for description label
         text_marker = Marker()
         text_marker.type = Marker.TEXT_VIEW_FACING
-        text_marker.text = description
-        text_marker.scale.x = width
+        text_marker.text = vision_obj.description
+        text_marker.scale.x = vision_obj.width
         text_marker.color.r = 1.0
         text_marker.color.g = 1.0
         text_marker.color.b = 1.0
         text_marker.color.a = 1.0
-        text_marker.pose.position.z = z + height/2 + 0.05 # A bit above the object
+        text_marker.pose.position.z = vision_obj.z + vision_obj.height/2 + 0.05 # A bit above the object
 
         control.markers.append( marker )
         control.markers.append(text_marker)
@@ -118,37 +119,34 @@ class SceneHandler:
 
         self.object_idx += 1
 
-        obj = Object()
-        obj.header = Header()
-        obj.header.stamp = rospy.Time.now()
-        obj.id =id
-        obj.frame_id = frame_id
-        obj.description =description
-        obj.x = x
-        obj.y = y
-        obj.width = width
-        obj.length = length
-        obj.height = height
-
-        self.objects[id] = obj
+        # Add frame id to vision object
+        vision_obj.frame_id = frame_id
+    
+        self.objects[id] = vision_obj  # Vision obj will either update exisitng object or be added new
 
     
 
-    def object_watcher_callback(self, msg):
+    def vision_sub(self, msg):
         # TODO Connect to VLM
 
-        if not self.objects: # Only add if objects list is empty (first time called)
-            self.add_object(id= 'apple_1', description='apple', 
-                            x=0.5, y=0, z=0.025, length=0.05, width=0.05, height=0.05 )
+        # if not self.objects: # Only add if objects list is empty (first time called)
+        #     self.add_object(id= 'apple_1', description='apple', 
+        #                     x=0.5, y=0, z=0.025, length=0.05, width=0.05, height=0.05 )
             
-            self.add_object(id= 'bread_1',  description='bread', 
-                    x=0.5, y=0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
+        #     self.add_object(id= 'bread_1',  description='bread', 
+        #             x=0.5, y=0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
             
-            self.add_object(id= 'peanut_butter_1',  description='peanut butter jar', 
-                    x=0.5, y=-0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
+        #     self.add_object(id= 'peanut_butter_1',  description='peanut butter jar', 
+        #             x=0.5, y=-0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
+        
 
+        # Add or update objects detected by vision model to scene
+        for obj in msg.objects:
+            self.add_object(obj)
+        
+        # Publish updated scene
         msg = ObjectArray()
-        for id, obj in self.objects.items():
+        for _, obj in self.objects.items():
             msg.objects.append(obj)
 
         self.object_pub.publish(msg)

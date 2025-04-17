@@ -16,8 +16,10 @@ from interface.msg import Object, ObjectArray
 class VisionInterface:
     def __init__(self):
         rospy.init_node('vision_interface')
+
+        self.model, self.processor = warmup()
     
-        self.object_pub = rospy.Publisher("/vision/objects", ObjectArray, queue_size=10)
+        self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
         rospy.Timer(rospy.Duration(0.1), self.object_monitor_pub)
 
@@ -25,10 +27,40 @@ class VisionInterface:
         rospy.spin()
 
 
+    def mmToM(self, mm:float) -> float:
+        """
+        Convert millimeters to meters
+        """
+        M = float(mm) / 1000
+        return M
+    
 
     def object_monitor_pub(self, msg):
         # TODO Connect to VLM
 
+        objects = command(self.model, self.processor, "")
+
+        msg = ObjectArray()
+        for objDict in objects:
+            
+            # TODO: Make different width, len, height
+            dim = self.mmToM(objDict['depth_max']) - self.mmToM(objDict['depth_min'])
+
+            obj = Object()
+            obj.header = Header()
+            obj.header.stamp = rospy.Time.now()
+            obj.id = objDict['label']
+            obj.description = objDict['label']
+            obj.x = self.mmToM(objDict['center_coord'][0])
+            obj.y = self.mmToM(objDict['center_coord'][1])
+            obj.z = self.mmToM(objDict['center_coord'][2])
+            obj.width = dim
+            obj.length = dim
+            obj.height = dim
+
+            msg.objects.append(obj)
+        
+        # TODO convert to robot frame of reference
 
         self.object_pub.publish(msg)
 
