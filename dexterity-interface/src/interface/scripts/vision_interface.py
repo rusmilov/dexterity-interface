@@ -6,7 +6,7 @@ Vision system that looks for objects
 
 import rospy
 import copy
-from assistive_robotics_thesis.src.florence_2_L.main import 
+from assistive_robotics_thesis.src.florence_2_L.main import warmup, command
 
 from std_msgs.msg import Header
 from interface.msg import Object, ObjectArray
