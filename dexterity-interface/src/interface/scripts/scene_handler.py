@@ -27,10 +27,10 @@ class SceneHandler:
         self.object_pub = rospy.Publisher("/scene/objects", ObjectArray, queue_size=10)
 
         self.objects = {}  # Dictionary of current objects in scene
-        self.object_idx = 0  # Name of marker needs to be unique or won't show
+    
 
         # Timer to publish transforms and monitor objects in scene
-        rospy.Timer(rospy.Duration(0.01), self.frame_callback)
+        rospy.Timer(rospy.Duration(0.001), self.frame_callback)
     
 
         rospy.spin()
@@ -73,8 +73,16 @@ class SceneHandler:
         """
         vision_obj.id: MUST BE UNIQUE per object
         """
-
         frame_id = f"object/{vision_obj.id}"
+        vision_obj.frame_id = frame_id
+        
+        
+        # If object already exists, don't creat it again
+        if vision_obj.id in self.objects: 
+            self.objects[vision_obj.id] = vision_obj  # Add to object list
+            return
+
+        # Else, create the object
         object = InteractiveMarker()
         object.header.frame_id = frame_id 
         object.pose.position = Point(0,0,0)
@@ -116,28 +124,13 @@ class SceneHandler:
         self.server.insert(object, self.process_feedback)
         self.server.applyChanges()
 
-        self.object_idx += 1
+        self.objects[vision_obj.id] = vision_obj
 
-        # Add frame id to vision object
-        vision_obj.frame_id = frame_id
     
-        self.objects[id] = vision_obj  # Vision obj will either update exisitng object or be added new
-
+        
     
 
     def vision_sub(self, msg):
-        # TODO Connect to VLM
-
-        # if not self.objects: # Only add if objects list is empty (first time called)
-        #     self.add_object(id= 'apple_1', description='apple', 
-        #                     x=0.5, y=0, z=0.025, length=0.05, width=0.05, height=0.05 )
-            
-        #     self.add_object(id= 'bread_1',  description='bread', 
-        #             x=0.5, y=0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
-            
-        #     self.add_object(id= 'peanut_butter_1',  description='peanut butter jar', 
-        #             x=0.5, y=-0.2, z=0.025, length=0.05, width=0.05, height=0.05 )
-        
 
         # Add or update objects detected by vision model to scene
         for obj in msg.objects:

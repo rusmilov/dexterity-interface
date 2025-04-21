@@ -10,6 +10,7 @@ RUN chmod 1777 /tmp && \
     apt-get update && \
     apt-get install -y --fix-missing \
     curl \
+    git \
     python3-pip \
     build-essential \
     cmake \

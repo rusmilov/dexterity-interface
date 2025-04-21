@@ -41,7 +41,10 @@ You will need:
 
     If you do need the Kinect, run:
     ```bash
+    xhost +local:
+    
     sudo docker build -t llm-control-kinect .
+
     sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host llm-control-kinect
     ```
 ### 4. Compile ros packages
@@ -107,7 +110,11 @@ For more information, please refer to [panda-primitives-control](https://github.
 ## Running
 1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running this command:
     ```bash
-    roslaunch interface backend.launch
+    # If the kinect is attached
+    roslaunch interface backend.launch  use_kinect:=true
+
+    # Else run this if it is not attached
+    roslaunch interface backend.launch use_kinect:=false
     ```
 
     Note: If you run into an issue with catkin not being able to find the authoring package, please run `catkin clean -y` in the `dexterity-interface/` and the `panda-primitives/` directories and then redo Step 4 in the setup. After that, this command should work.
