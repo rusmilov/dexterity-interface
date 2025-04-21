@@ -30,7 +30,7 @@ class SceneHandler:
     
 
         # Timer to publish transforms and monitor objects in scene
-        rospy.Timer(rospy.Duration(0.001), self.frame_callback)
+        rospy.Timer(rospy.Duration(0.05), self.frame_callback)
     
 
         rospy.spin()
@@ -39,8 +39,15 @@ class SceneHandler:
     def frame_callback(self, msg ):
         time = rospy.Time.now()
 
-        for _, obj in self.objects.items():
-            self.br.sendTransform( (obj.x, obj.y, obj.z), (0, 0, 0, 1.0), time, obj.frame_id, "scene")
+        # Use a list of keys to avoid modifying the dictionary during iteration
+        if self.objects:
+            for obj_id in list(self.objects.keys()):
+                obj = self.objects[obj_id]
+                self.br.sendTransform( (obj.x, obj.y, obj.z), (0, 0, 0, 1.0), time, obj.frame_id, "scene")
+
+        # If no objects, broadcast temporary object so scene is broadcast
+        else:
+            self.br.sendTransform( (0,0,0), (0, 0, 0, 1.0), time, "object/none", "scene")
 
 
     def process_feedback(self, feedback ):
@@ -75,7 +82,7 @@ class SceneHandler:
         """
         frame_id = f"object/{vision_obj.id}"
         vision_obj.frame_id = frame_id
-        
+
         
         # If object already exists, don't creat it again
         if vision_obj.id in self.objects: 
@@ -83,6 +90,8 @@ class SceneHandler:
             return
 
         # Else, create the object
+        self.objects[vision_obj.id] = vision_obj
+
         object = InteractiveMarker()
         object.header.frame_id = frame_id 
         object.pose.position = Point(0,0,0)
@@ -121,9 +130,10 @@ class SceneHandler:
         control.always_visible = True
         object.controls.append(control)
 
+   
         self.server.insert(object, self.process_feedback)
+        
         self.server.applyChanges()
-
         self.objects[vision_obj.id] = vision_obj
 
     
@@ -142,6 +152,7 @@ class SceneHandler:
             msg.objects.append(obj)
 
         self.object_pub.publish(msg)
+        
 
         
 

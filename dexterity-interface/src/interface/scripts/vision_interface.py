@@ -11,6 +11,8 @@ from assistive_robotics_thesis.src.florence_2_L.main import warmup, command
 from std_msgs.msg import Header
 from interface.msg import Object, ObjectArray
 
+import random
+
 
 
 class VisionInterface:
@@ -21,8 +23,8 @@ class VisionInterface:
     
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
-        rospy.Timer(rospy.Duration(0.5), self.object_monitor)
-
+        rospy.Timer(rospy.Duration(5), self.object_monitor)
+        print("STARTING DETECTION NOW.")
 
         rospy.spin()
 
@@ -31,7 +33,7 @@ class VisionInterface:
         """
         Convert millimeters to meters
         """
-        M = float(mm) / 10
+        M = float(mm) / 1000
         return M
     
 
@@ -43,7 +45,8 @@ class VisionInterface:
         for objDict in objects:
             
             # TODO: Make different width, len, height
-            dim = self.mmToM(objDict['depth_max']) - self.mmToM(objDict['depth_min'])
+            # dim = self.mmToM(objDict['depth_max']) - self.mmToM(objDict['depth_min'])
+            dim = 0.05
 
             obj = Object()
             obj.header = Header()
@@ -59,6 +62,26 @@ class VisionInterface:
 
             msg.objects.append(obj)
 
+        #     print(obj)
+
+        # objects = ['apple', 'bread', 'peanut_butter']
+        # dim = 0.05
+
+        # msg = ObjectArray()
+        # for label in objects:
+        #     obj = Object()
+        #     obj.header = Header()
+        #     obj.header.stamp = rospy.Time.now()
+        #     obj.id = label
+        #     obj.description = label
+        #     obj.x = random.uniform(0.1, 0.3) 
+        #     obj.y = random.uniform(-0.3, 0.3) 
+        #     obj.z = 0.025  
+        #     obj.width = dim
+        #     obj.length = dim
+        #     obj.height = dim
+
+        #     msg.objects.append(obj)
         
         # TODO convert to robot frame of reference
 

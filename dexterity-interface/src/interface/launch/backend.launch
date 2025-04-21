@@ -1,6 +1,5 @@
 <launch>
-    <arg name="use_kinect" default="false"/>
-
+    
 
     <node pkg="interface" type="llm_executor.py" name="llm_executor" output="screen" />
     <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen" />
@@ -15,14 +14,8 @@
         <remap from="target_frame" to="/scene" />
     </node> 
     <node pkg="interface" type="scene_handler.py" name="scene_handler" output="screen" />
-    
-    <group if="$(arg use_kinect)">
-        <node pkg="interface" type="vision_interface.py" name="vision_interface" output="screen" />
-    </group>
 
-    <group unless="$(arg use_kinect)">
-        <node pkg="interface" type="test_vision_interface.py" name="test_vision_interface" output="screen" />
-    </group>
+
 
 
   <!-- _____________________________ PANDA-PRIMITIVES LAUNCH _____________________________ -->
