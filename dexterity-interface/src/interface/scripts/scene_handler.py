@@ -75,7 +75,7 @@ class SceneHandler:
         self.server.applyChanges()
 
 
-
+    
     def add_object(self, vision_obj: Object) -> str:
         """
         vision_obj.id: MUST BE UNIQUE per object

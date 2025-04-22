@@ -1,8 +1,8 @@
 
 
 <launch>
-    <arg name="use_kinect" default="false"/>
 
+    <arg name="use_kinect" default="false"/>
     <group if="$(arg use_kinect)">
         <node pkg="interface" type="vision_interface.py" name="vision_interface" output="screen" />
     </group>

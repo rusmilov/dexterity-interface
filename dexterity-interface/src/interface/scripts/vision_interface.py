@@ -4,13 +4,14 @@
 Vision system that looks for objects
 """
 
-import rospy
-import copy
 from assistive_robotics_thesis.src.florence_2_L.main import warmup, command
-
-from std_msgs.msg import Header
 from interface.msg import Object, ObjectArray
 
+import rospy
+import copy
+import tf
+from std_msgs.msg import Header
+from geometry_msgs.msg import PointStamped
 import random
 
 
@@ -20,6 +21,8 @@ class VisionInterface:
         rospy.init_node('vision_interface')
 
         self.model, self.processor = warmup()
+
+        self.tf_listener = tf.TransformListener()
     
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
@@ -29,13 +32,31 @@ class VisionInterface:
         rospy.spin()
 
 
-    def mmToM(self, mm:float) -> float:
+    def mm_to_M(self, mm:float) -> float:
         """
         Convert millimeters to meters
         """
         M = float(mm) / 1000
         return M
     
+
+    def camera_to_scene_transform(self, x, y, z):
+        """Convert  camera feed to scene frame of reference"""
+
+        source = "camera_base"
+        goal = "scene"
+
+        point = PointStamped()
+        point.header.frame_id = source
+        point.header.stamp = rospy.Time(0)
+        point.point.x = x
+        point.point.y = y
+        point.point.z = z
+        self.tf_listener.waitForTransform(goal, source, rospy.Time(0), rospy.Duration(4.0))
+        point_in_scene = self.tf_listener.transformPoint(goal, point)
+
+        return (point_in_scene.point.x, point_in_scene.point.y, point_in_scene.point.z)
+
 
     def object_monitor(self, event):
 
@@ -45,45 +66,33 @@ class VisionInterface:
         for objDict in objects:
             
             # TODO: Make different width, len, height
-            # dim = self.mmToM(objDict['depth_max']) - self.mmToM(objDict['depth_min'])
+            # dim = self.mm_to_M(objDict['depth_max']) - self.mm_to_M(objDict['depth_min'])
             dim = 0.05
 
+            try:
+                x, y, z = self.camera_to_scene_transform( 
+                    self.mm_to_M(objDict['center_coord'][0]), 
+                    self.mm_to_M(objDict['center_coord'][1]),
+                    self.mm_to_M(objDict['center_coord'][2])
+                )
+            except (tf.Exception, tf.LookupException, tf.ConnectivityException) as e:
+                rospy.logwarn(f"TF transform failed: {e}")
+                continue
+                
             obj = Object()
             obj.header = Header()
             obj.header.stamp = rospy.Time.now()
             obj.id = objDict['label']
             obj.description = objDict['label']
-            obj.x = self.mmToM(objDict['center_coord'][0])
-            obj.y = self.mmToM(objDict['center_coord'][1])
-            obj.z = self.mmToM(objDict['center_coord'][2])
+            obj.x = x
+            obj.y = y
+            obj.z = z
             obj.width = dim
             obj.length = dim
             obj.height = dim
 
             msg.objects.append(obj)
 
-        #     print(obj)
-
-        # objects = ['apple', 'bread', 'peanut_butter']
-        # dim = 0.05
-
-        # msg = ObjectArray()
-        # for label in objects:
-        #     obj = Object()
-        #     obj.header = Header()
-        #     obj.header.stamp = rospy.Time.now()
-        #     obj.id = label
-        #     obj.description = label
-        #     obj.x = random.uniform(0.1, 0.3) 
-        #     obj.y = random.uniform(-0.3, 0.3) 
-        #     obj.z = 0.025  
-        #     obj.width = dim
-        #     obj.length = dim
-        #     obj.height = dim
-
-        #     msg.objects.append(obj)
-        
-        # TODO convert to robot frame of reference
 
         
 
