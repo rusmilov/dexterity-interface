@@ -23,7 +23,7 @@ class VisionInterface:
     
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
-        rospy.Timer(rospy.Duration(5), self.object_monitor)
+        rospy.Timer(rospy.Duration(1), self.object_monitor)
         print("STARTING DETECTION NOW.")
 
         rospy.spin()
