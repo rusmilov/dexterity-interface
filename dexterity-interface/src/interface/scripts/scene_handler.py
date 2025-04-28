@@ -103,7 +103,6 @@ class SceneHandler:
             rospy.logwarn(f"Timeout or error waiting for TF frame {vision_obj.frame_id}: {e}")
 
 
-
         object = InteractiveMarker()
         object.header.stamp = rospy.Time.now()
         object.header.frame_id = frame_id 

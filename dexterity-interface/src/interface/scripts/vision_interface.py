@@ -48,7 +48,7 @@ class VisionInterface:
 
         point = PointStamped()
         point.header.frame_id = source
-        point.header.stamp = rospy.Time.now()
+        point.header.stamp = rospy.Time(0)
         point.point.x = x
         point.point.y = y
         point.point.z = z

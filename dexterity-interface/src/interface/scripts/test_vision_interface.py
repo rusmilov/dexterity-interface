@@ -19,7 +19,7 @@ class VisionInterface:
         rospy.init_node('vision_interface')
 
     
-        self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
+        self.object_pub = rospy.Publisher("/scene/vision/objects", Object, queue_size=10)
 
         rospy.Timer(rospy.Duration(3), self.object_monitor)
 
@@ -31,23 +31,21 @@ class VisionInterface:
         objects = ['apple', 'bread', 'peanut_butter']
         dim = 0.05
 
-        msg = ObjectArray()
         for label in objects:
-            obj = Object()
-            obj.header = Header()
-            obj.header.stamp = rospy.Time.now()
-            obj.id = label
-            obj.description = label
-            obj.x = random.uniform(0.1, 0.3) 
-            obj.y = random.uniform(-0.3, 0.3) 
-            obj.z = 0.025  
-            obj.width = dim
-            obj.length = dim
-            obj.height = dim
+            msg = Object()
+            msg.header = Header()
+            msg.header.stamp = rospy.Time.now()
+            msg.id = label
+            msg.description = label
+            msg.x = random.uniform(0.1, 0.3) 
+            msg.y = random.uniform(-0.3, 0.3) 
+            msg.z = 0.025  
+            msg.width = dim
+            msg.length = dim
+            msg.height = dim
 
-            msg.objects.append(obj)
 
-        self.object_pub.publish(msg)
+            self.object_pub.publish(msg)
 
             
 
