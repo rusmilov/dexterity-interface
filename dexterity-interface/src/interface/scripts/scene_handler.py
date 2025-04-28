@@ -96,28 +96,12 @@ class SceneHandler:
         self.objects[vision_obj.id] = vision_obj
 
 
-        # Allow a short delay for TF to catch up
-        rospy.sleep(0.5)  # 100ms buffer before checking
-
         # Wait for the transform to become available
-        timeout = rospy.Time.now() + rospy.Duration(2.0)
-        rate = rospy.Rate(10)
-        rospy.loginfo(f"WAITING FOR FRAME TO BE PUBLISHED {frame_id}")
-        while not rospy.is_shutdown():
-            try:
-                self.tf_listener.waitForTransform("scene", vision_obj.frame_id, rospy.Time(0), rospy.Duration(0.1))
-                rospy.loginfo(f"FOUND FRAME! {frame_id}")
-                break
-            except (tf.Exception, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-                pass
+        try:
+            self.tf_listener.waitForTransform("scene", vision_obj.frame_id, rospy.Time(0), rospy.Duration(2.0))
+        except (tf.Exception, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
+            rospy.logwarn(f"Timeout or error waiting for TF frame {vision_obj.frame_id}: {e}")
 
-            if rospy.Time.now() > timeout:
-                print(f"EXCEEDED TIMEOUT {frame_id}")
-                rospy.logwarn(f"Timeout waiting for TF frame {vision_obj.frame_id}")
-                break
-            rate.sleep()
-
-        print("EXITING LOOP")
 
 
         object = InteractiveMarker()
