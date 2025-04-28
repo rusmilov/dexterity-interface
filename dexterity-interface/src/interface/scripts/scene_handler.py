@@ -25,7 +25,7 @@ class SceneHandler:
         self.server = InteractiveMarkerServer("scene/object_controls")
         self.br = TransformBroadcaster()
         self.tf_listener = tf.TransformListener()
-        rospy.Subscriber("/scene/vision/objects", Object, self.vision_sub)
+        rospy.Subscriber("/scene/vision/objects", ObjectArray, self.vision_sub)
         self.object_pub = rospy.Publisher("/scene/objects", ObjectArray, queue_size=10)
 
         self.objects = {}  # Dictionary of current objects in scene
@@ -41,15 +41,14 @@ class SceneHandler:
     def frame_callback(self, event):
         
         # Use a list of keys to avoid modifying the dictionary during iteration
+        time = rospy.Time.now()
         if self.objects:
             for obj_id in list(self.objects.keys()):
-                time = rospy.Time.now()
                 obj = self.objects[obj_id]
                 self.br.sendTransform( (obj.x, obj.y, obj.z), (0, 0, 0, 1.0), time, obj.frame_id, "scene")
-
+            
         # If no objects, broadcast temporary object so scene is broadcast
         else:
-            time = rospy.Time.now()
             self.br.sendTransform( (0,0,0), (0, 0, 0, 1.0), time, "object/none", "scene")
 
 
@@ -156,15 +155,15 @@ class SceneHandler:
     def vision_sub(self, msg):
 
         # Add or update objects detected by vision model to scene
-        obj = msg
-        self.add_object(obj)
-        
-        # Publish updated scene
-        msg = ObjectArray()
-        for _, obj in self.objects.items():
-            msg.objects.append(obj)
+        for obj in msg.objects:
+            self.add_object(obj)
 
-        self.object_pub.publish(msg)
+        # Publish updated scene
+        msg_out = ObjectArray()
+        for _, obj in self.objects.items():
+            msg_out.objects.append(obj)
+
+        self.object_pub.publish(msg_out)
         
 
         

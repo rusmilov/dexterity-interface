@@ -24,7 +24,7 @@ class VisionInterface:
 
         self.tf_listener = tf.TransformListener()
     
-        self.object_pub = rospy.Publisher("/scene/vision/objects", Object, queue_size=10)
+        self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
         rospy.Timer(rospy.Duration(1), self.object_monitor)
         print("STARTING DETECTION NOW.")
@@ -62,6 +62,7 @@ class VisionInterface:
 
         objects = command(self.model, self.processor, "")
 
+        msg = ObjectArray()
         for objDict in objects:
             
             # TODO: Make different width, len, height
@@ -78,24 +79,24 @@ class VisionInterface:
                 rospy.logwarn(f"TF transform failed: {e}")
                 continue
                 
-            msg = Object()
-            msg.header = Header()
-            msg.header.stamp = rospy.Time.now()
-            msg.id = objDict['label']
-            msg.description = objDict['label']
-            msg.x = x
-            msg.y = y
-            msg.z = z
-            msg.width = dim
-            msg.length = dim
-            msg.height = dim
+            obj = Object()
+            obj.header = Header()
+            obj.header.stamp = rospy.Time.now()
+            obj.id = objDict['label']
+            obj.description = objDict['label']
+            obj.x = x
+            obj.y = y
+            obj.z = z
+            obj.width = dim
+            obj.length = dim
+            obj.height = dim
 
-            self.object_pub.publish(msg)
+            msg.objects.append(obj)
 
-
-        
 
         
+
+        self.object_pub.publish(msg)
 
         
 

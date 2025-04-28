@@ -1,5 +1,5 @@
 <launch>
-    
+    <arg name="use_kinect" default="false"/>
 
     <node pkg="interface" type="llm_executor.py" name="llm_executor" output="screen" />
     <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen" />
@@ -16,6 +16,11 @@
     <node pkg="interface" type="scene_handler.py" name="scene_handler" output="screen" />
 
     <node pkg="tf" type="static_transform_publisher" name="static_tf_scene_to_panda" args="0 0 0 0 0 0 scene panda_link0 100" />
+
+    <!-- Kinect
+    <include file="$(find interface)/launch/vision.launch">  
+        <arg name="use_kinect" default="$(arg use_kinect)"/>
+    </include> -->
 
 
   <!-- _____________________________ PANDA-PRIMITIVES LAUNCH _____________________________ -->

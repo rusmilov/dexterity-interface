@@ -1,5 +1,3 @@
-
-
 <launch>
 
     <arg name="use_kinect" default="false"/>
