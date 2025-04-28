@@ -103,7 +103,6 @@ class SceneHandler:
 
 
         object = InteractiveMarker()
-        object.header.stamp = rospy.Time.now()
         object.header.frame_id = frame_id 
         object.pose.position = Point(0,0,0)
         object.scale = 1
