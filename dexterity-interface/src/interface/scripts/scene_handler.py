@@ -11,6 +11,7 @@ from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
 from geometry_msgs.msg import Point
+import tf
 from tf.broadcaster import TransformBroadcaster
 from std_msgs.msg import Header
 from interface.msg import Object, ObjectArray
@@ -23,7 +24,8 @@ class SceneHandler:
     
         self.server = InteractiveMarkerServer("scene/object_controls")
         self.br = TransformBroadcaster()
-        rospy.Subscriber("/scene/vision/objects", ObjectArray, self.vision_sub)
+        self.tf_listener = tf.TransformListener()
+        rospy.Subscriber("/scene/vision/objects", Object, self.vision_sub)
         self.object_pub = rospy.Publisher("/scene/objects", ObjectArray, queue_size=10)
 
         self.objects = {}  # Dictionary of current objects in scene
@@ -36,17 +38,18 @@ class SceneHandler:
         rospy.spin()
 
 
-    def frame_callback(self, msg ):
-        time = rospy.Time.now()
-
+    def frame_callback(self, event):
+        
         # Use a list of keys to avoid modifying the dictionary during iteration
         if self.objects:
             for obj_id in list(self.objects.keys()):
+                time = rospy.Time.now()
                 obj = self.objects[obj_id]
                 self.br.sendTransform( (obj.x, obj.y, obj.z), (0, 0, 0, 1.0), time, obj.frame_id, "scene")
 
         # If no objects, broadcast temporary object so scene is broadcast
         else:
+            time = rospy.Time.now()
             self.br.sendTransform( (0,0,0), (0, 0, 0, 1.0), time, "object/none", "scene")
 
 
@@ -92,7 +95,33 @@ class SceneHandler:
         # Else, create the object
         self.objects[vision_obj.id] = vision_obj
 
+
+        # Allow a short delay for TF to catch up
+        rospy.sleep(0.5)  # 100ms buffer before checking
+
+        # Wait for the transform to become available
+        timeout = rospy.Time.now() + rospy.Duration(2.0)
+        rate = rospy.Rate(10)
+        rospy.loginfo(f"WAITING FOR FRAME TO BE PUBLISHED {frame_id}")
+        while not rospy.is_shutdown():
+            try:
+                self.tf_listener.waitForTransform("scene", vision_obj.frame_id, rospy.Time(0), rospy.Duration(0.1))
+                rospy.loginfo(f"FOUND FRAME! {frame_id}")
+                break
+            except (tf.Exception, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                pass
+
+            if rospy.Time.now() > timeout:
+                print(f"EXCEEDED TIMEOUT {frame_id}")
+                rospy.logwarn(f"Timeout waiting for TF frame {vision_obj.frame_id}")
+                break
+            rate.sleep()
+
+        print("EXITING LOOP")
+
+
         object = InteractiveMarker()
+        object.header.stamp = rospy.Time.now()
         object.header.frame_id = frame_id 
         object.pose.position = Point(0,0,0)
         object.scale = 1
@@ -130,11 +159,12 @@ class SceneHandler:
         control.always_visible = True
         object.controls.append(control)
 
+
    
         self.server.insert(object, self.process_feedback)
         
         self.server.applyChanges()
-        self.objects[vision_obj.id] = vision_obj
+
 
     
         
@@ -143,8 +173,8 @@ class SceneHandler:
     def vision_sub(self, msg):
 
         # Add or update objects detected by vision model to scene
-        for obj in msg.objects:
-            self.add_object(obj)
+        obj = msg
+        self.add_object(obj)
         
         # Publish updated scene
         msg = ObjectArray()
