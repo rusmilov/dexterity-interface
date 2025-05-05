@@ -61,7 +61,7 @@ source devel/setup.bash
 
 ```
 
-<!-- 
+
 ### 4.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
 This step will compile panda-primitives-control package that control Panda Robot in low level, you can skip it if you only need simulation
 
@@ -97,7 +97,8 @@ This step will compile panda-primitives-control package that control Panda Robot
     catkin build controller --no-notify
     cd ..
     ```
-3. Run with ROS
+
+3. Setup panda and start controller
     1. Use Franka Desktop to unlock the Panda's joints and enable FCI mode.
     2. Run `source panda-primitives-control/devel/setup.bash` inside the root directory
     3. Start the launch files related to the application:
@@ -112,8 +113,8 @@ For more information, please refer to [panda-primitives-control](https://github.
 
     If you are using the kinect:
     ```bash
-    roslaunch interface vision.launch use_kinect:=true
-    roslaunch interface backend.launch
+    roslaunch interface vision.launch use_kinect:=true # Run this on the Big Chonker computer
+    roslaunch interface backend.launch # Run this on computer connected to Panda.
     ```
 
     Else, run the following in SEPERATE terminals:
