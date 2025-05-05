@@ -3,7 +3,7 @@ export class LLMChat {
         this.ros = rosConnection
         this.divID = divID;
         this.chatHistoryID = chatHistoryID;
-        this.chatHistoryID = runOnBotID;
+        this.runOnBotID = runOnBotID;
 
         this.llmListener = new ROSLIB.Topic({
             ros : this.ros,
@@ -33,13 +33,13 @@ export class LLMChat {
         const text = document.createElement("pre");
         text.textContent = `AGENT:\n${message.data}`;
         historyElem.appendChild(text);
-        changeButtonVisibility(false);
+        this.changeButtonVisibility(false);
 
     }
     
 
     userInputCallback(inputID) {
-        changeButtonVisibility(false);
+        this.changeButtonVisibility(false);
         let elem = document.getElementById(inputID);
         let value = elem.value;
         

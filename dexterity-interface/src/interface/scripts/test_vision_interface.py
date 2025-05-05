@@ -21,7 +21,7 @@ class VisionInterface:
     
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
 
-        rospy.Timer(rospy.Duration(3), self.object_monitor)
+        rospy.Timer(rospy.Duration(10), self.object_monitor)
 
 
         rospy.spin()
@@ -38,8 +38,8 @@ class VisionInterface:
             obj.header.stamp = rospy.Time.now()
             obj.id = label
             obj.description = label
-            obj.x = random.uniform(0.1, 0.3) 
-            obj.y = random.uniform(-0.3, 0.3) 
+            obj.x = random.uniform(0.3, 0.5) 
+            obj.y = random.uniform(-0.2, 0.2) 
             obj.z = 0.025  
             obj.width = dim
             obj.length = dim

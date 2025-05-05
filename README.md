@@ -32,20 +32,20 @@ You will need:
 
 3. Now  build the container image and start the container. Make sure you are in this root directory. These commands mount on the current directory as the containers file system so any changes you make to the files on your host machine will be mirrored in the container. These commands also allow the containers display to be forwarded to your host machine so that you can see it.
 
-    If you don't need the Kinect, run:
     ```bash
     sudo docker build -t llm-control .
+    ```
 
+    If you don't need the Kinect, run:
+    ```bash
     sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host llm-control
     ```
 
-    If you do need the Kinect, run:
+    Else if you do need the Kinect, run:
     ```bash
     xhost +local:
-    
-    sudo docker build -t llm-control-kinect .
 
-    sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host llm-control-kinect
+    sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host control
     ```
 ### 4. Compile ros packages
 
@@ -58,7 +58,6 @@ source devel/setup.bash
 cd ../dexterity-interface
 catkin build
 source devel/setup.bash
-
 ```
 
 
@@ -73,7 +72,7 @@ This step will compile panda-primitives-control package that control Panda Robot
 
     If first time, first configure:
     ```bash
-    cd panda-primitives-control/src/PandaController
+    cd ../panda-primitives-control/src/PandaController
     mkdir build
     cd build
     cmake ..
@@ -82,9 +81,9 @@ This step will compile panda-primitives-control package that control Panda Robot
 
     Anytime, run:
     ```bash
-    cd panda-primitives-control/src/PandaController/build
+    cd ../panda-primitives-control/src/PandaController/build
     make install
-    cd ../../../..
+    cd ../../../../..
     ```
 
     ### Compile ROS package
@@ -109,7 +108,7 @@ For more information, please refer to [panda-primitives-control](https://github.
 
     1. If you want the program to run on the robot run these each: 
 		```bash
-		roslaunch controller mover_test.launch
+		roslaunch controller mover.launch
         roslaunch interface backend.launch only_virtual:=false # Run in another terminal
 		```
 
