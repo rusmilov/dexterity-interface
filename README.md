@@ -98,30 +98,36 @@ This step will compile panda-primitives-control package that control Panda Robot
     cd ..
     ```
 
-3. Setup panda and start controller
+3. Setup panda 
     1. Use Franka Desktop to unlock the Panda's joints and enable FCI mode.
     2. Run `source panda-primitives-control/devel/setup.bash` inside the root directory
-    3. Start the launch files related to the application:
-		```bash
-		roslaunch controller mover_test.launch
-		```
 For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control) -->
 
 
 ## Running
-1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running these commands.
+1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running these commands, each in a different terminal.
 
-    If you are using the kinect:
-    ```bash
-    roslaunch interface vision.launch use_kinect:=true # Run this on the Big Chonker computer
-    roslaunch interface backend.launch # Run this on computer connected to Panda.
-    ```
+    1. If you want the program to run on the robot run these each: 
+		```bash
+		roslaunch controller mover_test.launch
+        roslaunch interface backend.launch only_virtual:=false # Run in another terminal
+		```
 
-    Else, run the following in SEPERATE terminals:
-    ```bash
-    roslaunch interface vision.launch use_kinect:=false
-    roslaunch interface backend.launc
-    ```
+        Else if you just want to run in simulation,  run:
+     	```bash
+         roslaunch interface backend.launch only_virtual:=true 
+		```
+
+        
+    2. If you are using the kinect run the following. Make sure this is on the computer with the Big Chonker GPU.
+        ```bash
+        roslaunch interface vision.launch use_kinect:=true
+        ```
+        
+        Else, to simulate a couple objects, use:
+        ```bash
+        roslaunch interface vision.launch use_kinect:=false
+        ```
 
     Note: If you run into an issue with catkin not being able to find the authoring package, please run `catkin clean -y` in the `dexterity-interface/` and the `panda-primitives/` directories and then redo Step 4 in the setup. After that, this command should work.
 
