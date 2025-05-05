@@ -200,8 +200,9 @@ def command_callback(msg):
             commands.append(move(x, y, z))
             rospy.loginfo("Added a MOVE action to the queue")
         elif action == "STOP":
-            commands.append(stop())
-            rospy.loginfo("Added a STOP action to the queue")
+            # STOP is currently causing motion abort error.
+            # commands.append(stop())
+            # rospy.loginfo("Added a STOP action to the queue")
 
             # Upon receiving STOP, publish all accumulated commands at once
             cmd_msg = Command()

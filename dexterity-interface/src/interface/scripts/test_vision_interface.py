@@ -18,28 +18,34 @@ class VisionInterface:
     def __init__(self):
         rospy.init_node('vision_interface')
 
-    
+        self.objects = [ {'label': 'apple'}, {'label': 'bread'}, {'label': 'peanut_butter'} ]
+        self.generate_random_coords(None)
+
         self.object_pub = rospy.Publisher("/scene/vision/objects", ObjectArray, queue_size=10)
-
-        rospy.Timer(rospy.Duration(10), self.object_monitor)
-
+        rospy.Timer(rospy.Duration(0.1), self.object_monitor)
+        rospy.Timer(rospy.Duration(30), self.generate_random_coords) # Adjust object positions every so often
 
         rospy.spin()
 
 
+    def generate_random_coords(self, event):
+        for obj in self.objects:
+            obj['x'] = random.uniform(0.3, 0.5)
+            obj['y'] = random.uniform(-0.15, 0.15) 
+
+
     def object_monitor(self, event):
-        objects = ['apple', 'bread', 'peanut_butter']
         dim = 0.05
 
         msg = ObjectArray()
-        for label in objects:
+        for each_obj in self.objects:
             obj = Object()
             obj.header = Header()
             obj.header.stamp = rospy.Time.now()
-            obj.id = label
-            obj.description = label
-            obj.x = random.uniform(0.3, 0.5) 
-            obj.y = random.uniform(-0.2, 0.2) 
+            obj.id = each_obj['label']
+            obj.description = each_obj['label']
+            obj.x = each_obj['x']
+            obj.y = each_obj['y']
             obj.z = 0.025  
             obj.width = dim
             obj.length = dim
