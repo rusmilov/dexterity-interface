@@ -140,24 +140,27 @@ On both computers, run:
 export ROS_MASTER_URI=http://<IP_ADDRESS_OF_MAIN_MACHINE>:11311
 export ROS_IP=<IP_ADDRESS_OF_CURRENT_MACHINE>
 ```
-On the "main" computer, run the following:
-```bash
-roscore
-```
 
 For example in our setup, our "main" computer (with roscore) would be the laptop and 
 we would run the following there:
 ```bash
-export ROS_MASTER_URI=http:192.168.3.2:11311
+export ROS_MASTER_URI=http://192.168.3.2:11311
 export ROS_IP=192.168.3.2
 ```
 
 And run the following on the secondary desktop computer:
 ```bash
-export ROS_MASTER_URI=http:192.168.3.2:11311
+export ROS_MASTER_URI=http://192.168.3.2:11311
 export ROS_IP=192.168.3.3
 ```
 
+
+On the "main" computer, run the following:
+```bash
+roscore
+```
+
+Now you are ready to run all the other commands in other terminals across your 2 machines.
 
 ## Troubleshooting
 
