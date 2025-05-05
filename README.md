@@ -117,7 +117,7 @@ For more information, please refer to [panda-primitives-control](https://github.
          roslaunch interface backend.launch only_virtual:=true 
 		```
 
-        
+
     2. If you are using the kinect run the following. Make sure this is on the computer with the Big Chonker GPU.
         ```bash
         roslaunch interface vision.launch use_kinect:=true
@@ -132,7 +132,32 @@ For more information, please refer to [panda-primitives-control](https://github.
 
 
 2. Launch a live server for `frontend/index.html`. If you are using VScode, you can do that by selecting that file to open it, and in the lower right of VSCode click "Go Live". This should launch the interface in your browser.
-    
+
+
+## Running across multiple computers
+On both computers, run:
+```bash
+export ROS_MASTER_URI=http://<IP_ADDRESS_OF_MAIN_MACHINE>:11311
+export ROS_IP=<IP_ADDRESS_OF_CURRENT_MACHINE>
+```
+On the "main" computer, run the following:
+```bash
+roscore
+```
+
+For example in our setup, our "main" computer (with roscore) would be the laptop and 
+we would run the following there:
+```bash
+export ROS_MASTER_URI=http:192.168.3.2:11311
+export ROS_IP=192.168.3.2
+```
+
+And run the following on the secondary desktop computer:
+```bash
+export ROS_MASTER_URI=http:192.168.3.2:11311
+export ROS_IP=192.168.3.3
+```
+
 
 ## Troubleshooting
 
