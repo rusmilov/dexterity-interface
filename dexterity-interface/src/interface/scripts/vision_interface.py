@@ -20,7 +20,7 @@ class VisionInterface:
     def __init__(self):
         rospy.init_node('vision_interface')
 
-        self.model, self.processor = warmup()
+        self.model, self.processor = warmup(show_images=True)
 
         self.tf_listener = tf.TransformListener()
     
