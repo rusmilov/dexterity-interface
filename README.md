@@ -20,14 +20,9 @@ You will need:
     ```
 
 ### 3. Set up the repository and run the container
-1. Bring in the submodules:
+1. Bring in the submodules and/or make sure they are updated:
     ```bash
     git submodule update --init --recursive
-    ```
-
-    If you already initialized the submodules and need to make sure they are updated, run:
-    ```bash
-    git submodule update --remote
     ```
 
 3. Now  build the container image and start the container. Make sure you are in this root directory. These commands mount on the current directory as the containers file system so any changes you make to the files on your host machine will be mirrored in the container. These commands also allow the containers display to be forwarded to your host machine so that you can see it.
@@ -165,6 +160,10 @@ Now you are ready to run all the other commands in other terminals across your 2
 ## Troubleshooting
 
 ```bash
+# To view submodule status
+git submodule status
+
+
 # To view TF frames
 rosrun tf2_tools view_frames.py
 ```
