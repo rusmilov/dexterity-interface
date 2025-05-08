@@ -1,9 +1,6 @@
 [submodule "panda-primitives"]
 	path = panda-primitives
 	url = https://github.com/Wisc-HCI/panda-primitives.git
-[submodule "panda-primitives-control"]
-	path = panda-primitives-control
-	url = https://github.com/Wisc-HCI/panda-primitives-control.git
 [submodule "dexterity-interface/src/authoring-msgs"]
 	path = dexterity-interface/src/authoring-msgs
 	url = https://github.com/emmanuel-senft/authoring-msgs.git
