@@ -24,32 +24,32 @@
     <arg name="with_utils" default="true"/>
     <arg name="only_virtual" default="true"/>
 
-    <node pkg="authoring" type="static_publisher" name="external_view_static_publisher">
+    <node pkg="panda-primitives" type="static_publisher" name="external_view_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="external_view_transform" />
     </node>
-    <node pkg="authoring" type="static_publisher" name="internal_camera_static_publisher">
+    <node pkg="panda-primitives" type="static_publisher" name="internal_camera_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="internal_camera_transform" />
     </node>
-    <node pkg="authoring" type="static_publisher" name="sim_ee_static_publisher">
+    <node pkg="panda-primitives" type="static_publisher" name="sim_ee_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />
         <param name="transform" type="string" value="sim_ee_transform" />
     </node>
 
     <group if="$(arg only_virtual)">
-        <node pkg="authoring" type="static_publisher" name="panda_gripper_static_publisher">
+        <node pkg="panda-primitives" type="static_publisher" name="panda_gripper_static_publisher">
             <param name="file_name" type="string" value="transforms.yaml" />
             <param name="transform" type="string" value="sim_robot_transform" />
         </node>
 
-        <node pkg="authoring" type="simulator" name="simulator" output="screen">
+        <node pkg="panda-primitives" type="simulator" name="simulator" output="screen">
             <param name="only_virtual" value="$(arg only_virtual)" />
         </node>
     </group>
     
     <group if="$(arg with_utils)">
-        <include file="$(find authoring)/launch/utils.launch">  
+        <include file="$(find panda-primitives)/launch/utils.launch">  
             <arg name="only_virtual" default="$(arg only_virtual)"/>
         </include>
     </group>

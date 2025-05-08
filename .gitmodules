@@ -16,3 +16,6 @@
 [submodule "dexterity-interface/src/interactive_marker_proxy_noetic"]
 	path = dexterity-interface/src/interactive_marker_proxy_noetic
 	url = https://github.com/schromya/interactive_marker_proxy_noetic.git
+[submodule "dexterity-interface/src/panda-primitives"]
+	path = dexterity-interface/src/panda-primitives
+	url = https://github.com/Wisc-HCI/panda-primitives.git
