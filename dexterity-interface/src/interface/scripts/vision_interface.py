@@ -43,7 +43,7 @@ class VisionInterface:
     def camera_to_scene_transform(self, x, y, z):
         """Convert  camera feed to scene frame of reference"""
 
-        source = "internal_rgb_camera_rotated"
+        source = "camera_base_rgb"
         goal = "scene"
 
         point = PointStamped()
