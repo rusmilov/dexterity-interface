@@ -54,10 +54,10 @@ class LLMHandler():
 
 
         example_query = "Directive: Open a jar. Assume jar base is already stabilized." \
-            + "Objects: {'jar_1': {'description': 'jar, 'x':0.8, 'y': 0.4, 'z':0.2, 'length': 0.08, 'height': 0.12}," \
-            + "'apple_1': {'description': 'apple', 'x': 0.5, 'y': -0.4, 'z': 0.2, 'length': 0.08, 'width': 0.08, 'height': 0.08}}"
+            + "Objects: {'jar_1': {'description': 'jar, 'x':0.6, 'y': 0.2, 'z':0.05, 'length': 0.08, 'height': 0.12}," \
+            + "'apple_1': {'description': 'apple', 'x': 0.5, 'y': -0.1, 'z': 0.05, 'length': 0.08, 'width': 0.08, 'height': 0.08}}"
         
-        example_response = "1. MOVE x=0.8 y=0.4 z= 0.5\n 2. UNSCREW x=0.8 y=0.4 z= 0.2\n 2. PLACE x=0.8 y=0.6 z= 0\n3. END\n"
+        example_response = "1. MOVE x=0.6 y=0.2 z= 0.1\n 2. UNSCREW x=0.6 y=0.2 z= 0.05\n 3. MOVE x=0.5 y=-0.1 z= 0.2\n 4. PLACE x=0.5 y=-0.1 z= 0.05\n5. END\n"
         self.llm.init_history(example_query, example_response)
 
 
