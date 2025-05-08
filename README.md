@@ -44,15 +44,9 @@ You will need:
     ```
 ### 4. Compile ros packages
 
-This is a bit over-complicated due to having multiple workspaces. Turning some of these workspaces into packages is a future TODO item.
 ```bash
-cd panda-primitives
-catkin build authoring
-source devel/setup.bash
-
-cd ../dexterity-interface
+cd dexterity-interface
 catkin build
-source devel/setup.bash
 ```
 
 
@@ -123,7 +117,6 @@ For more information, please refer to [panda-primitives-control](https://github.
         roslaunch interface vision.launch use_kinect:=false
         ```
 
-    Note: If you run into an issue with catkin not being able to find the authoring package, please run `catkin clean -y` in the `dexterity-interface/` and the `panda-primitives/` directories and then redo Step 4 in the setup. After that, this command should work.
 
 
 2. Launch a live server for `frontend/index.html`. If you are using VScode, you can do that by selecting that file to open it, and in the lower right of VSCode click "Go Live". This should launch the interface in your browser.
