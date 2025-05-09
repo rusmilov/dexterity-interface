@@ -65,10 +65,6 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 COPY . /workspace
 WORKDIR /workspace
 
-
-WORKDIR /workspace/panda-primitives-control/spacenavd
-RUN ./configure && make install
-
 WORKDIR /workspace
 RUN pip install -r requirements.txt 
 

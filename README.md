@@ -10,7 +10,7 @@ You will need:
 
 * For Running on the Panda:
     * Above requirements.
-    * Franka Emika Panda Robotic arm with a Force Torque Sensor. Reference  [panda-primitives-control](https://github.com/wisc-HCI/panda-primitives-control) for the specifics.
+    * Franka Emika Panda Robotic arm with a Force Torque Sensor. Reference [PandController](https://github.com/Wisc-HCI/PandaController.git) to set this up.
 
 
 ### 2. Setup LLM configs
@@ -28,19 +28,19 @@ You will need:
 3. Now  build the container image and start the container. Make sure you are in this root directory. These commands mount on the current directory as the containers file system so any changes you make to the files on your host machine will be mirrored in the container. These commands also allow the containers display to be forwarded to your host machine so that you can see it.
 
     ```bash
-    sudo docker build -t llm-control .
+    sudo docker build -t dex-interface .
     ```
 
     If you don't need the Kinect, run:
     ```bash
-    sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host llm-control
+    sudo docker run --rm -it --privileged --cap-add=SYS_NICE --device=/dev/input/event* --env DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --net=host dex-interface
     ```
 
     Else if you do need the Kinect, run:
     ```bash
     xhost +local:
 
-    sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host llm-control
+    sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host dex-interface  
     ```
 
 ### 3.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
@@ -52,25 +52,19 @@ This step will compile panda-primitives-control package that control Panda Robot
     ```
 2. ### Compile non-ROS package (PandaController)
 
-    If first time, first configure:
     ```bash
     cd backend-ros/src/PandaController/
-    mkdir build
+    mkdir -p build
     cd build
-    cmake ..
-    cd ../../../..
-    ```
-
-    Anytime, run:
-    ```bash
-    cd backend-ros/src/PandaController/build
+    [ -f Makefile ] || cmake ..  # Only initialize if not  already
     make install
     cd ../../../..
     ```
 
 3. Setup panda 
-    1. Use Franka Desktop to unlock the Panda's joints and enable FCI mode.
-For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control) -->
+Use Franka Desktop to unlock the Panda's joints and enable FCI mode.
+For more information, please refer to [PandController](https://github.com/Wisc-HCI/PandaController.git)
+
 
 ### 4. Compile ros packages
 
@@ -85,21 +79,21 @@ source devel/setup.bash
 
     1. If you want the program to run on the robot run these each: 
 		```bash
-        roslaunch interface backend.launch only_virtual:=false # Run in another terminal
+        roslaunch interface backend.launch only_virtual:=false
 		```
 
         Else if you just want to run in simulation,  run:
      	```bash
-         roslaunch interface backend.launch only_virtual:=true 
+        roslaunch interface backend.launch only_virtual:=true 
 		```
 
 
-    2. If you are using the kinect run the following. Make sure this is on the computer with the Big Chonker GPU.
+    2. If you are using the kinect run the following. Make sure this is on the computer with the Nvidia GPU.
         ```bash
         roslaunch interface vision.launch use_kinect:=true
         ```
         
-        Else, to simulate a couple objects, use:
+        Else, to simulate a couple objects from the camera, use:
         ```bash
         roslaunch interface vision.launch use_kinect:=false
         ```
@@ -110,6 +104,7 @@ source devel/setup.bash
 
 
 ## Running across multiple computers
+
 On both computers, run:
 ```bash
 export ROS_MASTER_URI=http://<IP_ADDRESS_OF_MAIN_MACHINE>:11311
@@ -129,13 +124,19 @@ export ROS_MASTER_URI=http://192.168.3.2:11311
 export ROS_IP=192.168.3.3
 ```
 
+Note, if you open more terminals on each machine, you will have to run these exports in each new terminal.
 
 On the "main" computer, run the following:
 ```bash
 roscore
 ```
 
-Now you are ready to run all the other commands in other terminals across your 2 machines.
+Now you are ready to run all the previous commands across your 2 machines.
+
+
+## Launching multiple docker terminals
+To open multiple another terminal to you docker container, first run `sudo docker ps` on your local machine. This will give you a list of containers with container IDs. Then run `sudo docker exec -it YOUR_CONTAINER_ID bash` with your container ID. 
+
 
 ## Troubleshooting
 
@@ -148,10 +149,22 @@ git submodule status
 rosrun tf2_tools view_frames.py
 ```
 
+## Submodules
+
+These are the submodules used in this project
+- [authoring_msgs](https://github.com/emmanuel-senft/authoring-msgs)
+- [interactive_marker_proxy_noetic](https://github.com/schromya/interactive_marker_proxy_noetic/tree/tf-lifetime-fix): Make sure you are on the tf-lifetime-fix branch
+- [panda_ros](https://github.com/Wisc-HCI/panda_ros)
+- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives/tree/interface): Make sure you are on the interface branch
+- [panda-ros-msgs](https://github.com/emmanuel-senft/panda-ros-msgs/tree/study): Make sure you are on the study branch
+- [PandController](https://github.com/Wisc-HCI/PandaController)
+- [ros_numpy](https://github.com/eric-wieser/ros_numpy)
+- [rviz_camera_stream](https://github.com/lucasw/rviz_camera_stream)
+- [assistive_robotics_thesis](https://github.com/rusmilov/assistive_robotics_thesis/tree/hand-integration): Make sure you are on the hand-integration branch
+- 
 
 
 ## Resources
-
 * https://github.com/cruise-automation/webviz
 * https://github.com/osrf/rvizweb
 * https://robotwebtools.github.io/
@@ -162,14 +175,3 @@ rosrun tf2_tools view_frames.py
 * https://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/InteractiveMarkerControl.html
 
 
-## Submodules
-- [authoring_msgs](https://github.com/emmanuel-senft/authoring-msgs/tree/study): Make sure you are on the study branch
-- [interactive_marker_proxy_noetic](https://github.com/schromya/interactive_marker_proxy_noetic/tree/tf-lifetime-fix): Make sure you are on the tf-lifetime-fix branch
-- [panda_ros](https://github.com/Wisc-HCI/panda_ros)
-- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives/tree/interface): Make sure you are on the interface branch
-- [panda-ros-msgs](https://github.com/emmanuel-senft/panda-ros-msgs/tree/study): Make sure you are on the study branch
-- [PandController](https://github.com/Wisc-HCI/PandaController)
-- [ros_numpy](https://github.com/eric-wieser/ros_numpy)
-- [rviz_camera_stream](https://github.com/lucasw/rviz_camera_stream)
-- [assistive_robotics_thesis](https://github.com/rusmilov/assistive_robotics_thesis/tree/hand-integration): Make sure you are on the hand-integration branch
-- 
