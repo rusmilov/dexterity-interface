@@ -54,7 +54,7 @@ This step will compile panda-primitives-control package that control Panda Robot
 
     If first time, first configure:
     ```bash
-    cd dexterity-interface/src/PandaController/
+    cd backend-ros/src/PandaController/
     mkdir build
     cd build
     cmake ..
@@ -63,7 +63,7 @@ This step will compile panda-primitives-control package that control Panda Robot
 
     Anytime, run:
     ```bash
-    cd dexterity-interface/src/PandaController/build
+    cd backend-ros/src/PandaController/build
     make install
     cd ../../../..
     ```
@@ -75,13 +75,13 @@ For more information, please refer to [panda-primitives-control](https://github.
 ### 4. Compile ros packages
 
 ```bash
-cd dexterity-interface
+cd backend-ros
 catkin build
 source devel/setup.bash
 ```
 
 ## Running
-1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running these commands, each in a different terminal.
+1. Launch the Backend. Make sure you are in the `backend-ros/` directory when running these commands, each in a different terminal.
 
     1. If you want the program to run on the robot run these each: 
 		```bash

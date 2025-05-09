@@ -1,0 +1,23 @@
+# Ignore catkin build and devel directories
+build/
+devel/
+
+# Ignore log files
+logs/
+log/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore compiled files
+*.so
+*.o
+*.a
+*.out
+
+# Ignore VSCode & JetBrains settings (if using)
+.vscode/
+.idea/
