@@ -42,15 +42,8 @@ You will need:
 
     sudo docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -e PULSE_SERVER=unix:/run/user/1000/pulse/native -v /run/user/1000/pulse:/run/user/1000/pulse -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/workspace --device /dev/snd --device /dev/bus/usb --net=host llm-control
     ```
-### 4. Compile ros packages
 
-```bash
-cd dexterity-interface
-catkin build
-```
-
-
-### 4.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
+### 3.5 Compile panda-primitives-control package (SKIP FOR JUST SIMULATION/INTERFACE)
 This step will compile panda-primitives-control package that control Panda Robot in low level, you can skip it if you only need simulation
 
 1. Add necessary environment variables: Replace with your Panda's IP
@@ -61,43 +54,38 @@ This step will compile panda-primitives-control package that control Panda Robot
 
     If first time, first configure:
     ```bash
-    cd ../panda-primitives-control/src/PandaController
+    cd dexterity-interface/src/PandaController/
     mkdir build
     cd build
     cmake ..
-    cd ../../../..
+    cd ../../../../
     ```
 
     Anytime, run:
     ```bash
-    cd ../panda-primitives-control/src/PandaController/build
+    cd dexterity-interface/src/PandaController/build
     make install
-    cd ../../../../..
-    ```
-
-    ### Compile ROS package
-    Compile individually each ros packages:
-    ```bash
-    cd panda-primitives-control
-    catkin build panda_ros_msgs --no-notify
-    catkin build panda_ros --no-notify
-    catkin build inputs_ros --no-notify
-    catkin build controller --no-notify
-    cd ..
+    cd ../../../..
     ```
 
 3. Setup panda 
     1. Use Franka Desktop to unlock the Panda's joints and enable FCI mode.
-    2. Run `source panda-primitives-control/devel/setup.bash` inside the root directory
 For more information, please refer to [panda-primitives-control](https://github.com/Wisc-HCI/panda-primitives-control) -->
 
+### 4. Compile ros packages
+
+```bash
+cd dexterity-interface
+catkin build
+source devel/setup.bash
+```
 
 ## Running
 1. Launch the Backend. Make sure you are in the `dexterity-interface/` directory when running these commands, each in a different terminal.
 
     1. If you want the program to run on the robot run these each: 
 		```bash
-		roslaunch controller mover.launch
+		roslaunch panda_ros mover.launch
         roslaunch interface backend.launch only_virtual:=false # Run in another terminal
 		```
 
