@@ -1,5 +1,13 @@
+
+
 <launch>
     <arg name="use_kinect" default="false"/>
+    <arg name="only_virtual" default="true"/>
+
+    <group unless="$(arg only_virtual)">
+        <include file="$(find panda_ros)/launch/mover.launch">  
+        </include>
+    </group>
 
     <node pkg="interface" type="llm_executor.py" name="llm_executor" output="screen" />
     <node pkg="interface" type="llm_handler.py" name="llm_handler" output="screen" />
@@ -22,7 +30,7 @@
   <!-- _____________________________ PANDA-PRIMITIVES LAUNCH _____________________________ -->
 
     <arg name="with_utils" default="true"/>
-    <arg name="only_virtual" default="true"/>
+    
 
     <node pkg="panda-primitives" type="static_publisher" name="external_view_static_publisher">
         <param name="file_name" type="string" value="transforms.yaml" />

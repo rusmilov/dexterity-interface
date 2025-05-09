@@ -58,7 +58,7 @@ This step will compile panda-primitives-control package that control Panda Robot
     mkdir build
     cd build
     cmake ..
-    cd ../../../../
+    cd ../../../..
     ```
 
     Anytime, run:
@@ -85,7 +85,6 @@ source devel/setup.bash
 
     1. If you want the program to run on the robot run these each: 
 		```bash
-		roslaunch panda_ros mover.launch
         roslaunch interface backend.launch only_virtual:=false # Run in another terminal
 		```
 
