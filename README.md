@@ -166,8 +166,8 @@ rosrun tf2_tools view_frames.py
 - [authoring_msgs](https://github.com/emmanuel-senft/authoring-msgs/tree/study): Make sure you are on the study branch
 - [interactive_marker_proxy_noetic](https://github.com/schromya/interactive_marker_proxy_noetic/tree/tf-lifetime-fix): Make sure you are on the tf-lifetime-fix branch
 - [panda_ros](https://github.com/Wisc-HCI/panda_ros)
-- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives/tree/interface)
-- [panda-ros-msgs](https://github.com/emmanuel-senft/panda-ros-msgs/tree/study)
+- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives/tree/interface): Make sure you are on the interface branch
+- [panda-ros-msgs](https://github.com/emmanuel-senft/panda-ros-msgs/tree/study): Make sure you are on the study branch
 - [PandController](https://github.com/Wisc-HCI/PandaController)
 - [ros_numpy](https://github.com/eric-wieser/ros_numpy)
 - [rviz_camera_stream](https://github.com/lucasw/rviz_camera_stream)
