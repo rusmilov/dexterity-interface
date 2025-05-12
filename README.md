@@ -164,9 +164,119 @@ These are the submodules used in this project
 - 
 
 
+## ROS Packages and Topics
+```mermaid
+flowchart TB
+    %% Legend / Key
+    subgraph Key["Legend"]
+        k1["File"]:::script
+        k2(["Topic"]):::topic
+        k3(["Service"]):::service
+
+    end
+
+    %% Frontend
+    subgraph frontend
+        LLMChat["**LLMChat.js** <br> Handles chat interface"]:::file
+        Visualizer["**Visualizer.js** <br> Handles robot and object visualization"]:::file
+    end
+
+    %% interactive_marker_proxy
+    subgraph interactive_marker_proxy
+        proxy["**src/proxy.cpp** <br> <u>Node:</u> proxy <br> Middleman for handling objects in scene to display"]:::file
+    end
+
+    %% Interface
+    subgraph interface
+        llm_handler["**scripts/llm_handler.py** <br> <u>Node:</u> llm_handler <br> Sends/receives messages from ChatGPT"]:::file
+        scene_handler["**scripts/scene_handler** <br> <u>Node:</u> scene_handler <br> Keeps track of objects in scene"]:::file
+        vision_interface["**scripts/vision_interface** <br> <u>Node:</u> vision_interface <br> Pings Kinect ~1s to detect objects"]:::file
+        llm_executor["**scripts/llm_executor.py** <br> <u>Node:</u> panda_command_executor <br> Parses ChatGPT response into primitives"]:::file
+    end
+
+    %% panda_primitives
+    subgraph panda_primitives
+        planner["**nodes/planner** <br> <u>Node:</u> planner <br> Breaks high level primitives into lower level ones"]:::file
+        mover_server["**nodes/mover_server** <br> <u>Node:</u> mover_server <br> Logic for lower level primitives"]:::file
+    end
+
+    %% panda_ros
+    subgraph panda_ros
+        panda_node["**src/panda_ros.cpp** <br> <u>Node:</u> panda_controller <br> Executes lowest level code on robot"]:::file
+    end
+
+    %% Topics and Services
+    user_response(["/user_response"]):::topic
+    llm_response(["/llm_response"]):::topic
+    llm_commands(["/llm_commands"]):::topic
+    parser_command(["/parser/command"]):::service
+    scene_object_ctrl(["/scene/object_controls/update"]):::topic
+    scene_object_ctrl_tunnel(["/scene/object_controls/tunneled/update"]):::topic
+    scene_objects(["/scene/objects"]):::topic
+    scene_vision(["/scene/vision/objects"]):::topic
+    mover_srv(["/mover_server"]):::topic
+    panda_ctrl(["/panda/control_wrench"]):::topic
+    panda_joint(["/panda/joint_states"]):::topic
+    panda_cart(["/panda/cart_velocity"]):::topic
+    panda_cmd(["/panda/commands"]):::topic
+    panda_pose(["/panda/hybrid_pose"]):::topic
+
+    %% Frontend links
+    LLMChat -- Publisher --> user_response
+    llm_response -- Subscriber --> LLMChat
+    scene_object_ctrl_tunnel -- Subscriber --> Visualizer
+
+
+    %% Interactive Marker Proxy links
+    scene_object_ctrl -- Subscriber --> proxy 
+    proxy -- Publisher --> scene_object_ctrl_tunnel
+
+
+
+    %% Interface links
+    user_response -- Subscriber --> llm_handler
+    llm_handler -- Publisher --> llm_commands
+    llm_handler  -- Publisher --> llm_response
+    llm_handler -- Subscriber --> scene_objects
+    scene_objects -- Publisher --> scene_handler
+    scene_handler -- Publisher --> scene_object_ctrl
+    scene_handler -- Subscriber --> scene_vision
+    scene_vision -- Publisher --> vision_interface
+    vision_interface -- Subscriber --> scene_vision
+    llm_commands -- Subscriber --> llm_executor
+    llm_executor -- Publisher --> parser_command
+
+    %% panda_primitives
+    parser_command -- Subscriber --> planner
+    planner -- Publisher --> mover_srv
+    mover_srv -- Subscriber --> mover_server
+    
+    mover_server -- Publisher --> panda_cmd
+    mover_server -- Publisher --> panda_node
+    panda_ctrl -- Subscriber --> mover_server
+    panda_joint -- Subscriber --> mover_server
+    panda_cart -- Subscriber --> mover_server
+
+
+    %% panda_ros
+    panda_cmd -- Subscriber --> panda_node
+    panda_pose -- Subscriber --> panda_node
+    panda_node -- Publisher --> panda_ctrl
+    panda_node -- Publisher --> panda_joint
+    panda_node -- Publisher --> panda_cart
+
+    %% Styling
+    classDef file fill:#fff3b0, stroke:#000, color:#000;
+    classDef topic fill:#d6b3ff, stroke:#000,  color:#000;
+    classDef service fill:#ffb3d1,stroke:#000, color:#000;
+
+```
+
+
+
+
+
 ## Resources
-* https://github.com/cruise-automation/webviz
-* https://github.com/osrf/rvizweb
 * https://robotwebtools.github.io/
 * https://github.com/Mechazo11/interactive_marker_proxy_noetic
 * https://github.com/ros-visualization/visualization_tutorials/tree/noetic-devel/interactive_marker_tutorials
