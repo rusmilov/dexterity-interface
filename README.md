@@ -12,6 +12,78 @@ You will need:
     * Above requirements.
     * Franka Emika Panda Robotic arm with a Force Torque Sensor. Reference [PandController](https://github.com/Wisc-HCI/PandaController.git) to set this up.
 
+```mermaid
+flowchart LR
+
+    %% Panda Controller
+    subgraph PC["**Panda Controller**"]
+        PC_CONN["Round Pin Connector"]:::power_data
+    end
+
+    %% Panda Arm
+    subgraph PA["**Panda Robot**"]
+        PA_IP["IP: 192.168.1.3"]:::ethernet
+        PA_CONN["Round Pin Connector"]:::power_data
+    end
+
+    %% Force Torque Sensor
+    subgraph FTS["**Force Torque Sensor**"]
+        FTS_IP["IP: 192.168.2.2"]:::ethernet
+        FTS_PWR["Barrel Jack"]:::power_data
+    end
+
+    %% FT Power Supply
+    subgraph FTPS["**Force Torque Sensor Power Supply**"]
+        FT_DESC["Must be powered on."]:::description
+    end
+
+    %% Kinect
+    subgraph KN["**Azure Kinect Camera**"]
+        KN_PWR["Barrel Jack"]:::power_data
+        KN_USBC["USB C"]:::power_data
+    end
+
+    %% Computer A
+    subgraph MA["**Computer A**"]
+        MA_DESC["Requires Real-Time Kernel Patch. Runs Panda controller (backend.launch). "]:::description
+        MA_IP1["IP: 192.168.1.5"]:::ethernet
+        MA_IP2["IP: 192.168.2.5"]:::ethernet
+        MA_IP3["IP: 192.168.3.2"]:::ethernet
+    end
+
+    %% Computer B
+    subgraph MB["**Computer B**"]
+        MB_DESC["Requires Nvidia GPU to run VLM (vision.launch). "]:::description
+        MB_IP["IP: 192.168.3.3"]:::ethernet
+        MB_USBA["USB A"]:::power_data
+        MB_USBC["USB C"]:::power_data
+    end
+
+    %% Wall Outlets
+    PC_PWR["Wall Outlet"]:::power_data
+    FTPS_PWR["Wall Outlet"]:::power_data
+    MB_PWR["Wall Outlet"]:::power_data
+
+    %% Connections
+    PC_PWR --- PC_CONN --- PA_CONN --- PA
+    FTS_PWR --- FTPS --- FTPS_PWR
+    MB --- MB_PWR
+    
+    KN_PWR --- MB_USBA
+    KN_USBC --- MB_USBC
+    
+
+    PA_IP --- MA_IP1
+    FTS_IP --- MA_IP2
+    MA_IP3 --- MB_IP
+
+    %% Styles
+    classDef description fill:none,stroke:none,color:#fff;
+    classDef ethernet fill:#fff3b0,stroke:#000,color:#000;
+    classDef power_data fill:#f5b7b1,stroke:#000,color:#000;
+
+
+```
 
 ### 2. Setup LLM configs
 1. First, you need to create a .env file in this folder with the OpenAI credentials. It should be in this format:
