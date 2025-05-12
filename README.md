@@ -169,7 +169,7 @@ These are the submodules used in this project
 flowchart TB
     %% Legend / Key
     subgraph Key["Legend"]
-        k1["File"]:::script
+        k1["File"]:::file
         k2(["Topic"]):::topic
         k3(["Service"]):::service
 
