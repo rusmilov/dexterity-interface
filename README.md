@@ -252,7 +252,7 @@ flowchart TB
     mover_srv -- Subscriber --> mover_server
     
     mover_server -- Publisher --> panda_cmd
-    mover_server -- Publisher --> panda_node
+    mover_server -- Publisher --> panda_pose
     panda_ctrl -- Subscriber --> mover_server
     panda_joint -- Subscriber --> mover_server
     panda_cart -- Subscriber --> mover_server
