@@ -2,15 +2,27 @@
 
 ## Setup
 ### 1. Install Requirements
-You will need:
-* For the simulation/interface:
-    * Ubuntu machine
+
+* For the simulation/interface you will need:
+    * Ubuntu Machine A with the [Realtime Kernel Patch Kernel Patch](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel)
     * [Docker Engine](https://docs.docker.com/engine/install/).
     * A live server. For VScode, we recommend [Live Server Extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer).
 
-* For Running on the Panda:
+* For Running on the Panda you will additionally need:
     * Above requirements.
-    * Franka Emika Panda Robotic arm with a Force Torque Sensor. Reference [PandController](https://github.com/Wisc-HCI/PandaController.git) to set this up.
+    * Franka Emika Panda 7 DOF Robot setup with the [FCI](https://frankaemika.github.io/docs/getting_started.html).
+        * Robot system version: 4.2.X (FER pandas)
+        * Robot / Gripper Server version: 5 / 3
+    * [Axio80-M20 Force Torque Sensor](https://www.ati-ia.com/products/ft/ft_models.aspx?id=Axia80-M20) installed on the Panda's End Effector.
+
+* For Running with the Vision and Kinect you will additionally need:
+    * Ubuntu Machine B with Nvidia GPU
+    * Azure Kinect
+
+
+<br>
+
+Below is a diagram for the proper static IPs and wiring that you need to setup the full system:
 
 ```mermaid
 flowchart LR
@@ -22,13 +34,13 @@ flowchart LR
 
     %% Panda Arm
     subgraph PA["**Panda Robot**"]
-        PA_IP["IP: 192.168.1.3"]:::ethernet
+        PA_IP["IP: 192.168.1.3 <br> Netmask: 255.255.255.0"]:::ethernet
         PA_CONN["Round Pin Connector"]:::power_data
     end
 
     %% Force Torque Sensor
     subgraph FTS["**Force Torque Sensor**"]
-        FTS_IP["IP: 192.168.2.2"]:::ethernet
+        FTS_IP["IP: 192.168.2.2 <br> Netmask: 255.255.255.0"]:::ethernet
         FTS_PWR["Barrel Jack"]:::power_data
     end
 
@@ -46,15 +58,15 @@ flowchart LR
     %% Computer A
     subgraph MA["**Computer A**"]
         MA_DESC["Requires Real-Time Kernel Patch. Runs Panda controller (backend.launch). "]:::description
-        MA_IP1["IP: 192.168.1.5"]:::ethernet
-        MA_IP2["IP: 192.168.2.5"]:::ethernet
-        MA_IP3["IP: 192.168.3.2"]:::ethernet
+        MA_IP1["IP: 192.168.1.5 <br> Netmask: 255.255.255.0"]:::ethernet
+        MA_IP2["IP: 192.168.2.5 <br> Netmask: 255.255.255.0"]:::ethernet
+        MA_IP3["IP: 192.168.3.2 <br> Netmask: 255.255.255.0"]:::ethernet
     end
 
     %% Computer B
     subgraph MB["**Computer B**"]
         MB_DESC["Requires Nvidia GPU to run VLM (vision.launch). "]:::description
-        MB_IP["IP: 192.168.3.3"]:::ethernet
+        MB_IP["IP: 192.168.3.3 <br> Netmask: 255.255.255.0"]:::ethernet
         MB_USBA["USB A"]:::power_data
         MB_USBC["USB C"]:::power_data
     end
