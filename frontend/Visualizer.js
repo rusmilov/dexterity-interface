@@ -48,14 +48,6 @@ export class Visualizer {
         fixedFrame: '/scene'
       });
 
-      // // Setup the marker client.
-      // var markerClient = new ROS3D.MarkerClient({
-      //   ros : this.ros,
-      //   tfClient : tfMarkerClient,
-      //   topic : '/visualization_marker',
-      //   rootObject : viewer.scene,
-      // });
-
 
       var imClient = new ROS3D.InteractiveMarkerClient({
         ros : this.ros,
