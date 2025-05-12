@@ -4,12 +4,13 @@
 
 * For the simulation/interface you will need:
     * Ubuntu Machine A with:
-        * The [Realtime Kernel Patch Kernel Patch](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel).
         * [Docker Engine](https://docs.docker.com/engine/install/).
         * A live server. For VScode, we recommend [Live Server Extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer).
 
 * For Running on the Panda you will additionally need:
     * Above requirements.
+    * Ubuntu Machine A with the following added:
+        * The [Realtime Kernel Patch Kernel Patch](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel).
     * Franka Emika Panda 7 DOF Robot setup with the [FCI](https://frankaemika.github.io/docs/getting_started.html).
         * Robot system version: 4.2.X (FER pandas)
         * Robot / Gripper Server version: 5 / 3
@@ -95,9 +96,9 @@ flowchart LR
     classDef description fill:none,stroke:none,color:#fff;
     classDef ethernet fill:#fff3b0,stroke:#000,color:#000;
     classDef power_data fill:#f5b7b1,stroke:#000,color:#000;
-
-
 ```
+
+
 ## Setup and Run on Machine A
 Make sure you are running the following on Machine A.
 
@@ -346,7 +347,7 @@ These are the submodules used in this project
 - [authoring_msgs](https://github.com/emmanuel-senft/authoring-msgs)
 - [interactive_marker_proxy_noetic](https://github.com/schromya/interactive_marker_proxy_noetic/tree/tf-lifetime-fix): Make sure you are on the tf-lifetime-fix branch
 - [panda_ros](https://github.com/Wisc-HCI/panda_ros)
-- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives/tree/interface): Make sure you are on the interface branch
+- [panda-primitives](https://github.com/Wisc-HCI/panda-primitives)
 - [panda-ros-msgs](https://github.com/emmanuel-senft/panda-ros-msgs/tree/study): Make sure you are on the study branch
 - [PandController](https://github.com/Wisc-HCI/PandaController)
 - [ros_numpy](https://github.com/eric-wieser/ros_numpy)
