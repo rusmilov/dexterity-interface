@@ -93,7 +93,7 @@ flowchart LR
     MA_IP3 --- MB_IP
 
     %% Styles
-    classDef description fill:none,stroke:none,color:#fff;
+    classDef description fill:none,stroke:none,color:#000;
     classDef ethernet fill:#fff3b0,stroke:#000,color:#000;
     classDef power_data fill:#f5b7b1,stroke:#000,color:#000;
 ```
