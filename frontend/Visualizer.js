@@ -32,8 +32,7 @@ export class Visualizer {
       let urdfClient = new ROS3D.UrdfClient({
         ros : this.ros,
         tfClient : tfClient,
-        // urdfModel: 'panda_arm_no_hand.urdf',
-        path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/interface/', // TODO: Host these somewhere else???
+        path : 'https://raw.githubusercontent.com/Wisc-HCI/panda-primitives/master/', // TODO: Host these somewhere else???
         rootObject : viewer.selectableObjects,
         loader : ROS3D.COLLADA_LOADER_2
       });

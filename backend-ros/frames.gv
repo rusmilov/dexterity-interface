@@ -1,0 +1,22 @@
+digraph G {
+"panda_hand" -> "sim_panda_gripper"[label=" Broadcaster: /sim_ee_static_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"panda_link8" -> "panda_hand"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_base" -> "internal_camera_base"[label=" Broadcaster: /internal_camera_static_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_tripod" -> "camera_base"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"internal_rgb_camera_link" -> "rotated_camera"[label=" Broadcaster: /rotated_camera_static_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"panda_link0" -> "external_view"[label=" Broadcaster: /external_view_static_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"scene" -> "panda_link0"[label=" Broadcaster: /static_tf_scene_to_panda\nAverage rate: 10.185\nBuffer length: 4.909\nMost recent transform: 1747166497.378\nOldest transform: 1747166492.469\n"];
+"scene" -> "object/none"[label=" Broadcaster: /scene_handler\nAverage rate: 20.202\nBuffer length: 4.95\nMost recent transform: 1747166497.302\nOldest transform: 1747166492.352\n"];
+"camera_base" -> "camera_base_rgb"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_base" -> "camera_body"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"panda_flange" -> "camera_holder"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"ft_sensor_link" -> "panda_flange"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_basenonrotated" -> "camera_tripod"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"panda_flange" -> "camera_basenonrotated"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"panda_link7" -> "ft_sensor_link"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"ft_sensor_link" -> "panda_link8"[label=" Broadcaster: /panda_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1747166497.340302"[ shape=plaintext ] ;
+}->"panda_link7";
+}
