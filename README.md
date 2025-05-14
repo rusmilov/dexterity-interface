@@ -191,7 +191,7 @@ Make sure you are running the following on Machine B.
 2. Compile ros packages
     ```bash
     cd backend-ros
-    catkin build
+    catkin build interface
     source devel/setup.bash
     ```
 
